@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tovushlar olami – virtual laboratoriya</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap">
+<style>
+:root{--bg:#eef3f8;--card:#fff;--ink:#14243a;--mute:#51627a;--line:#d5deea;--pri:#0b6fb8;--ok:#13805c;--bad:#c13a3a;--note:#e3f1fb;--scr:#0b1a2b;--grid:#17304b;--c1:#35e0ff;--c2:#7dff9b;--c3:#ffcf5a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1622;--card:#142133;--ink:#e6eef8;--mute:#9db0c8;--line:#26384f;--pri:#5bb6f5;--ok:#4cd7a0;--bad:#ff7b7b;--note:#17304a;--scr:#050d17;--grid:#12273d}}
+:root[data-theme="dark"]{--bg:#0d1622;--card:#142133;--ink:#e6eef8;--mute:#9db0c8;--line:#26384f;--pri:#5bb6f5;--ok:#4cd7a0;--bad:#ff7b7b;--note:#17304a;--scr:#050d17;--grid:#12273d}
+*{box-sizing:border-box;margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.6 Nunito,"Segoe UI",system-ui,sans-serif;padding:14px}
+.wrap{max-width:960px;margin:0 auto}
+header{padding:26px 22px;border-radius:18px;background:var(--scr);color:#e6eef8;margin-bottom:18px;position:relative;overflow:hidden}
+header h1{font-size:clamp(1.6rem,5vw,2.4rem);font-weight:800;line-height:1.15;margin-bottom:8px}
+header p{color:#a9bfd8;max-width:60ch}
+header svg{position:absolute;right:-10px;top:0;height:100%;opacity:.5;pointer-events:none}
+nav{display:flex;gap:8px;overflow-x:auto;margin-bottom:18px;padding-bottom:4px}
+nav a{flex:none;color:var(--ink);text-decoration:none;font-weight:700;font-size:.9rem;border:1px solid var(--line);background:var(--card);padding:6px 14px;border-radius:99px}
+nav a:hover,nav a:focus-visible{border-color:var(--pri);outline:none}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+h2{font-size:1.3rem;font-weight:800;margin-bottom:4px}
+.desc{color:var(--mute);margin-bottom:14px}
+canvas{display:block;width:100%;background:var(--scr);border-radius:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.btn{font:700 .95rem Nunito,sans-serif;background:var(--pri);color:#fff;border:0;border-radius:10px;padding:9px 16px;cursor:pointer;min-height:42px}
+.btn.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.on{background:var(--ok);color:#fff;border-color:var(--ok)}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--c3);outline-offset:2px}
+.sl{flex:1 1 260px;display:flex;flex-direction:column;gap:2px}
+.sl label{font-weight:700}
+input[type=range]{width:100%;accent-color:var(--pri);height:30px}
+.note{background:var(--note);border-left:4px solid var(--pri);border-radius:0 10px 10px 0;padding:10px 14px;margin-top:14px;font-size:.95rem}
+.stat{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.stat div{flex:1 1 130px;border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.stat b{display:block;font-size:1.25rem}
+.stat span{color:var(--mute);font-size:.82rem}
+.bar{height:12px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;width:0;background:var(--c3);transition:width .1s}
+.task,.q{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+.task select,.task input[type=number]{font:inherit;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);max-width:100%}
+.fb{font-weight:700;margin-top:8px;min-height:1.4em}
+.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.q label{display:block;border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:6px;cursor:pointer}
+.q label.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,transparent)}
+.q label.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,transparent)}
+.res{font-size:1.15rem;font-weight:800;margin-top:12px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+th{background:var(--note)}
+ul{margin:8px 0 8px 20px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<svg viewBox="0 0 200 100" preserveAspectRatio="xMaxYMid"><path d="M0 50 Q12 5 25 50 T50 50 T75 50 T100 50 T125 50 T150 50 T175 50 T200 50" fill="none" stroke="#35e0ff" stroke-width="2"/></svg>
+<h1>Tovushlar olami</h1>
+<p>5-sinf Tabiiy fanlar. Tebranishni ko‘ring, chastota va amplitudani o‘zgartiring, tovushni eshiting.</p>
+</header>
+<nav aria-label="Modullar"><a href="#m1">Hosil bo‘lishi</a><a href="#m2">Chastota</a><a href="#m3">Amplituda</a><a href="#m4">Muhit</a><a href="#m5">Taqqoslash</a><a href="#m6">Topshiriqlar</a><a href="#m7">Test</a><a href="#m8">O‘qituvchiga</a></nav>
+
+<section id="m1">
+<h2>1. Tovush qanday hosil bo‘ladi?</h2>
+<p class="desc">Tovush tebranayotgan jismdan hosil bo‘ladi. Torni chertib, tebranish va tovushni kuzating. Ovoz chiqishi uchun qurilma ovozi yoqilgan bo‘lsin.</p>
+<canvas id="c1" data-h="170" aria-label="Tebranayotgan tor"></canvas>
+<div class="row"><button class="btn" id="pluck">Torni chertish</button><button class="btn alt" id="damp">Torni ushlab to‘xtatish</button></div>
+<div class="stat"><div><b id="s1a">–</b><span>Tor holati</span></div><div><b id="s1b">–</b><span>Tovush</span></div></div>
+<div class="note"><b>Esda tuting:</b> tebranish to‘xtasa, tovush ham yo‘qoladi. Tebranayotgan tor havo zarrachalarini turtadi va havoda to‘lqin tarqaladi.</div>
+</section>
+
+<section id="m2">
+<h2>2. Chastota va tovush balandligi</h2>
+<p class="desc">Chastota – bir sekundda sodir bo‘ladigan tebranishlar soni. O‘lchov birligi: gerts (Hz). Chastota qancha katta bo‘lsa, tovush shuncha ingichka (baland) bo‘ladi.</p>
+<canvas id="c2" data-h="170" aria-label="Chastota to‘lqini"></canvas>
+<div class="row"><div class="sl"><label for="fs">Chastota: <span id="fv">200</span> Hz</label><input type="range" id="fs" min="100" max="1000" step="10" value="200"></div><button class="btn" id="fbtn">🔊 Tovushni eshitish</button></div>
+<div class="stat"><div><b id="fT">5 ms</b><span>Bitta tebranish vaqti T = 1 / f</span></div><div><b id="fP">Yo‘g‘on</b><span>Tovush tavsifi</span></div></div>
+<div class="note"><b>Formula:</b> f = N / t. Bu yerda f – chastota, N – tebranishlar soni, t – vaqt. Masalan, 2 sekundda 400 ta tebranish bo‘lsa, f = 400 / 2 = 200 Hz.<br>Ekrandagi to‘lqin sekin harakatlanadi, chunki haqiqiy tebranishni ko‘z ilg‘amaydi. Lekin to‘lqinlar zichligi chastotaga mos.</div>
+</section>
+
+<section id="m3">
+<h2>3. Amplituda va tovush qattiqligi</h2>
+<p class="desc">Amplituda – tebranayotgan jismning muvozanat holatidan eng katta chetlanishi. Amplituda katta bo‘lsa, tovush qattiq eshitiladi. Chastota o‘zgarmaydi.</p>
+<canvas id="c3" data-h="170" aria-label="Amplituda to‘lqini"></canvas>
+<div class="row"><div class="sl"><label for="as">Amplituda: <span id="av">40</span>%</label><input type="range" id="as" min="10" max="100" step="5" value="40"></div><button class="btn" id="abtn">🔊 Tovushni eshitish</button></div>
+<div class="stat"><div><b id="aL">O‘rtacha</b><span>Tovush qattiqligi</span><div class="bar"><i id="aB"></i></div></div></div>
+<div class="note"><b>Esda tuting:</b> amplituda tovushning <i>qattiqligini</i> belgilaydi, chastota esa uning <i>balandligini</i> (ingichka yoki yo‘g‘onligini). Bu ikki narsani aralashtirmang.</div>
+</section>
+
+<section id="m4">
+<h2>4. Tovush qaysi muhitlarda tarqaladi?</h2>
+<p class="desc">Tovush gaz, suyuqlik va qattiq jismda tarqaladi. Vakuumda tarqalmaydi. Chap tomondagi manbadan chiqqan to‘lqinda zarrachalar qanday tebranishini kuzating.</p>
+<canvas id="c4" data-h="190" aria-label="Muhitda zarrachalar tebranishi"></canvas>
+<div class="row" id="mbtns"><button class="btn on" data-m="gas">Gaz (havo)</button><button class="btn alt" data-m="liquid">Suyuqlik (suv)</button><button class="btn alt" data-m="solid">Qattiq jism (po‘lat)</button><button class="btn alt" data-m="vac">Vakuum</button></div>
+<div class="stat"><div><b id="mS">≈ 340 m/s</b><span>Tovush tezligi</span></div></div>
+<div class="note" id="mI"></div>
+</section>
+
+<section id="m5">
+<h2>5. To‘lqinlarni taqqoslash</h2>
+<p class="desc">Yuqoridagi to‘lqin – namuna. Pastdagisi o‘zgartirilgan. Farqni toping.</p>
+<canvas id="c5" data-h="220" aria-label="To‘lqinlarni taqqoslash"></canvas>
+<div class="row"><button class="btn" data-cm="freq">A: chastotasi katta</button><button class="btn alt" data-cm="amp">B: amplitudasi katta</button><button class="btn alt" data-cm="both">C: ikkalasi katta</button></div>
+<div class="note" id="cI"></div>
+</section>
+
+<section id="m6">
+<h2>6. Amaliy topshiriqlar</h2>
+<p class="desc">1- va 2-topshiriq uchun yuqoridagi slayderlardan foydalaning.</p>
+<div class="task"><b>1.</b> Chastotani 600 Hz ga o‘rnating.<div class="row"><button class="btn" data-t="1">Tekshirish</button></div><div class="fb" id="t1"></div></div>
+<div class="task"><b>2.</b> Amplitudani 80% ga o‘rnating.<div class="row"><button class="btn" data-t="2">Tekshirish</button></div><div class="fb" id="t2"></div></div>
+<div class="task"><b>3.</b> Chastota 200 Hz. 2 sekundda nechta to‘liq tebranish bo‘ladi? (N = f × t)<div class="row"><input type="number" id="t3i" inputmode="numeric" placeholder="Javob" aria-label="Javob"><button class="btn" data-t="3">Tekshirish</button></div><div class="fb" id="t3"></div></div>
+<div class="task"><b>4.</b> Vakuumda tovush nega tarqalmaydi?<div class="row"><select id="t4i" aria-label="Javob"><option value="">Tanlang</option><option value="a">Yorug‘lik yo‘q</option><option value="ok">Tovushni uzatadigan zarrachalar yo‘q</option><option value="c">Havo juda sovuq</option></select><button class="btn" data-t="4">Tekshirish</button></div><div class="fb" id="t4"></div></div>
+<div class="task"><b>5.</b> Amplituda oshirilsa, tovush qanday o‘zgaradi?<div class="row"><select id="t5i" aria-label="Javob"><option value="">Tanlang</option><option value="ok">Qattiqroq bo‘ladi</option><option value="b">Ingichkaroq bo‘ladi</option><option value="c">Yo‘g‘onroq bo‘ladi</option></select><button class="btn" data-t="5">Tekshirish</button></div><div class="fb" id="t5"></div></div>
+</section>
+
+<section id="m7">
+<h2>7. Nazorat testi</h2>
+<p class="desc">10 ta savol. Har biriga bitta javob tanlang.</p>
+<div id="quiz"></div>
+<div class="row"><button class="btn" id="qsub">Natijani ko‘rish</button><button class="btn alt" id="qrst">Qaytadan boshlash</button></div>
+<div class="res" id="qres" role="status"></div>
+</section>
+
+<section id="m8">
+<h2>O‘qituvchi uchun tavsiya</h2>
+<p class="desc">Simulyatsiya 40 daqiqalik darsga mo‘ljallangan.</p>
+<ul><li>Tovushning hosil bo‘lishi (1-modul): 5 daqiqa</li><li>Chastota va amplituda (2- va 3-modul): 10 daqiqa</li><li>Muhit va vakuum (4-modul): 8 daqiqa</li><li>Taqqoslash va topshiriqlar (5- va 6-modul): 10 daqiqa</li><li>Test va xulosa (7-modul): 7 daqiqa</li></ul>
+<p class="desc" style="margin-top:12px">O‘quvchilar kuzatish jadvalini daftarga ko‘chirib, o‘z natijalarini yozadi.</p>
+<div class="tw"><table><thead><tr><th>Tajriba</th><th>O‘zgartirilgan parametr</th><th>Kuzatilgan natija</th><th>Ilmiy xulosa</th></tr></thead><tbody>
+<tr><td>1</td><td>Chastota 100 Hz dan 800 Hz ga</td><td>To‘lqinlar zichlashdi, tovush ingichkalashdi</td><td>Chastota ortsa, tovush balandligi ortadi.</td></tr>
+<tr><td>2</td><td>Amplituda 20% dan 90% ga</td><td>To‘lqin balandligi ortdi, tovush kuchaydi</td><td>Amplituda tovush qattiqligini belgilaydi.</td></tr>
+<tr><td>3</td><td>Muhit vakuumga almashtirildi</td><td>Zarrachalar yo‘q, to‘lqin tarqalmadi</td><td>Tovush uchun moddiy muhit zarur.</td></tr>
+</tbody></table></div>
+</section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const TAU=Math.PI*2;
+/* ---------- canvas helper ---------- */
+const cv={};
+function setup(id){const c=$(id),o={c,x:c.getContext("2d"),W:0,H:+c.dataset.h};cv[id]=o;
+  const fit=()=>{const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;o.W=r.width;c.style.height=o.H+"px";c.width=Math.round(r.width*d);c.height=Math.round(o.H*d);o.x.setTransform(d,0,0,d,0,0)};
+  fit();new ResizeObserver(fit).observe(c);return o}
+function grid(o){const{x,W,H}=o;x.fillStyle=css("--scr");x.fillRect(0,0,W,H);x.strokeStyle=css("--grid");x.lineWidth=1;x.beginPath();
+  for(let i=0;i<=W;i+=40){x.moveTo(i,0);x.lineTo(i,H)}for(let j=0;j<=H;j+=H/4){x.moveTo(0,j);x.lineTo(W,j)}x.stroke()}
+function wave(o,cy,A,cycles,ph,col,lw=2.5){const{x,W}=o;x.strokeStyle=col;x.lineWidth=lw;x.lineJoin="round";x.beginPath();
+  for(let i=0;i<=W;i+=2){const y=cy-A*Math.sin(TAU*cycles*i/W-ph);i?x.lineTo(i,y):x.moveTo(i,y)}x.stroke()}
+/* ---------- audio ---------- */
+let ac=null,osc=null,gn=null,owner=null;
+function ctx(){if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume();return ac}
+function startTone(who,f,v){const a=ctx();stopTone();osc=a.createOscillator();gn=a.createGain();osc.type="sine";osc.frequency.value=f;gn.gain.value=0;
+  osc.connect(gn).connect(a.destination);osc.start();gn.gain.setTargetAtTime(v,a.currentTime,.03);owner=who;marks()}
+function stopTone(){if(osc){const a=ac,o=osc,g=gn;g.gain.setTargetAtTime(0,a.currentTime,.03);o.stop(a.currentTime+.15)}osc=gn=null;owner=null;marks()}
+function marks(){$("fbtn").classList.toggle("on",owner==="f");$("fbtn").textContent=owner==="f"?"⏹ To‘xtatish":"🔊 Tovushni eshitish";
+  $("abtn").classList.toggle("on",owner==="a");$("abtn").textContent=owner==="a"?"⏹ To‘xtatish":"🔊 Tovushni eshitish"}
+const vol=a=>.02+a/100*.22;
+/* ---------- module 1: string ---------- */
+const o1=setup("c1");let sA=0,damping=false;
+$("pluck").onclick=()=>{sA=1;damping=false;const a=ctx(),o=a.createOscillator(),g=a.createGain();o.type="triangle";o.frequency.value=196;
+  g.gain.setValueAtTime(.0001,a.currentTime);g.gain.exponentialRampToValueAtTime(.25,a.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+3);
+  o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+3.1)};
+$("damp").onclick=()=>{damping=true};
+function draw1(t,dt){sA*=Math.exp(-dt*(damping?9:.75));if(sA<.01)sA=0;
+  const{x,W,H}=o1;grid(o1);const L0=50,L1=W-50,cy=H/2;
+  x.fillStyle="#7d8fa8";x.fillRect(L0-12,cy-34,12,68);x.fillRect(L1,cy-34,12,68);
+  const sh=Math.cos(TAU*5*t);
+  for(let g=3;g>=0;g--){x.strokeStyle=g?`rgba(53,224,255,${.12*(4-g)})`:css("--c1");x.lineWidth=g?5:3;x.beginPath();
+    for(let i=L0;i<=L1;i+=4){const u=(i-L0)/(L1-L0),y=cy+Math.sin(Math.PI*u)*38*sA*(g?Math.cos(TAU*5*(t-g*.012)):sh);i>L0?x.lineTo(i,y):x.moveTo(i,y)}x.stroke()}
+  if(sA>.03){for(let k=0;k<4;k++){const p=((t*.7+k/4)%1),r=20+p*120;x.strokeStyle=`rgba(125,255,155,${(1-p)*.7*Math.min(1,sA*1.5)})`;x.lineWidth=2;x.beginPath();x.arc(W/2,cy,r,0,TAU);x.stroke()}}
+  $("s1a").textContent=sA>.03?"Tebranmoqda":"Tinch";$("s1b").textContent=sA>.03?"Eshitiladi":"Yo‘q"}
+/* ---------- module 2 & 3 ---------- */
+const o2=setup("c2"),o3=setup("c3"),fs=$("fs"),as=$("as");
+function pitch(f){return f<250?"Yo‘g‘on (past)":f<600?"O‘rtacha":"Ingichka (baland)"}
+function upd2(){const f=+fs.value;$("fv").textContent=f;$("fT").textContent=(1000/f).toFixed(1)+" ms";$("fP").textContent=pitch(f);if(owner==="f")osc.frequency.setTargetAtTime(f,ac.currentTime,.02)}
+fs.oninput=upd2;upd2();
+$("fbtn").onclick=()=>owner==="f"?stopTone():startTone("f",+fs.value,.1);
+function upd3(){const a=+as.value;$("av").textContent=a;$("aL").textContent=a<35?"Sekin":a<70?"O‘rtacha":"Qattiq";$("aB").style.width=a+"%";if(owner==="a")gn.gain.setTargetAtTime(vol(a),ac.currentTime,.02)}
+as.oninput=upd3;upd3();
+$("abtn").onclick=()=>owner==="a"?stopTone():startTone("a",300,vol(+as.value));
+function draw2(t){const{H}=o2;grid(o2);wave(o2,H/2,55,(+fs.value)/50,TAU*.6*t,css("--c1"))}
+function draw3(t){const{x,W,H}=o3;grid(o3);const A=+as.value/100*72;x.setLineDash([6,6]);x.strokeStyle=css("--c3");x.lineWidth=1;
+  x.beginPath();x.moveTo(0,H/2-A);x.lineTo(W,H/2-A);x.moveTo(0,H/2+A);x.lineTo(W,H/2+A);x.stroke();x.setLineDash([]);
+  wave(o3,H/2,A,4,TAU*.6*t,css("--c2"))}
+/* ---------- module 4: medium ---------- */
+const o4=setup("c4");let med="gas";
+const M={gas:{n:[16,5],a:9,w:3,s:"≈ 340 m/s",i:"Havo zarrachalari bir-biridan uzoq joylashgan. Ular bir-birini kam turtadi, shuning uchun tovush sekinroq tarqaladi."},
+ liquid:{n:[28,8],a:6,w:6,s:"≈ 1500 m/s",i:"Suv zarrachalari bir-biriga yaqinroq. Tovush suvda havodagidan taxminan 4 marta tez tarqaladi."},
+ solid:{n:[40,10],a:3.2,w:12,s:"≈ 5000 m/s",i:"Qattiq jismda zarrachalar juda zich va mahkam bog‘langan. Tovush bu yerda eng tez tarqaladi."},
+ vac:{s:"tarqalmaydi",i:"Vakuumda zarrachalar yo‘q, tebranishni uzatadigan hech narsa yo‘q. Manba tebransa ham, tovush tarqalmaydi va eshitilmaydi."}};
+document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{med=b.dataset.m;document.querySelectorAll("[data-m]").forEach(k=>k.classList.toggle("alt",k!==b));b.classList.add("on");
+  document.querySelectorAll("[data-m]").forEach(k=>k.classList.toggle("on",k===b));setM()});
+function setM(){$("mS").textContent=M[med].s;$("mI").innerHTML="<b>Muhit:</b> "+M[med].i}setM();
+function draw4(t){const{x,W,H}=o4,m=M[med];grid(o4);const w=m.w||4;
+  x.fillStyle=css("--c3");const sx=18+Math.sin(w*t*2)*4;x.fillRect(sx,H/2-26,14,52);x.beginPath();x.moveTo(sx+14,H/2-26);x.lineTo(sx+30,H/2-42);x.lineTo(sx+30,H/2+42);x.lineTo(sx+14,H/2+26);x.fill();
+  if(med==="vac"){x.fillStyle=css("--mute");x.font="700 15px Nunito,sans-serif";x.textAlign="center";x.fillText("Vakuum: zarrachalar yo‘q",W/2+20,H/2-4);x.font="13px Nunito,sans-serif";x.fillText("Tebranish uzatilmaydi",W/2+20,H/2+16);x.textAlign="left";return}
+  const[cols,rows]=m.n,x0=70,wd=W-x0-20,k=TAU*2/wd;
+  for(let i=0;i<cols;i++)for(let j=0;j<rows;j++){const bx=x0+i*wd/(cols-1),by=20+j*(H-40)/(rows-1),ph=k*(bx-x0)-w*t,dx=m.a*Math.sin(ph);
+    x.fillStyle=css("--c2");x.globalAlpha=.55-.4*Math.cos(ph);x.beginPath();x.arc(bx+dx,by,4,0,TAU);x.fill()}
+  x.globalAlpha=1}
+/* ---------- module 5: compare ---------- */
+const o5=setup("c5");let cm="freq";
+const C={freq:{c:6,a:1,i:"Pastdagi to‘lqin zichroq: chastotasi katta. Tovush ingichkaroq (balandroq) bo‘ladi, qattiqligi o‘zgarmaydi."},
+ amp:{c:3,a:2.2,i:"Pastdagi to‘lqin balandroq: amplitudasi katta. Tovush qattiqroq bo‘ladi, ingichkaligi o‘zgarmaydi."},
+ both:{c:6,a:2.2,i:"Pastdagi to‘lqin ham zichroq, ham balandroq: tovush ham ingichkaroq, ham qattiqroq bo‘ladi."}};
+document.querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>{cm=b.dataset.cm;document.querySelectorAll("[data-cm]").forEach(k=>k.classList.toggle("alt",k!==b));setC()});
+function setC(){$("cI").innerHTML="<b>Xulosa:</b> "+C[cm].i}setC();
+function draw5(t){const{x,H}=o5,c=C[cm];grid(o5);wave(o5,H*.25,24,3,TAU*.5*t,css("--c1"));wave(o5,H*.75,24*c.a,c.c,TAU*.5*t,css("--c2"));
+  x.fillStyle=css("--c3");x.font="700 13px Nunito,sans-serif";x.fillText("Namuna",10,16);x.fillText("O‘zgartirilgan",10,H/2+16)}
+/* ---------- module 6: tasks ---------- */
+function fb(id,ok,msg){const e=$(id);e.textContent=msg;e.className="fb "+(ok?"ok":"bad")}
+document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{const n=+b.dataset.t;
+  if(n===1){const v=+fs.value;fb("t1",v===600,v===600?"To‘g‘ri! Chastota 600 Hz.":"Hozir "+v+" Hz. 2-modulda slayderni 600 Hz ga qo‘ying.")}
+  if(n===2){const v=+as.value;fb("t2",v===80,v===80?"To‘g‘ri! Amplituda 80%.":"Hozir "+v+"%. 3-modulda slayderni 80% ga qo‘ying.")}
+  if(n===3){const v=$("t3i").value;fb("t3",+v===400&&v!=="",+v===400&&v!==""?"To‘g‘ri! N = 200 × 2 = 400 ta tebranish.":"Qayta urinib ko‘ring. N = f × t formulasidan foydalaning.")}
+  if(n===4){const v=$("t4i").value;fb("t4",v==="ok",v==="ok"?"To‘g‘ri! Tovushni uzatadigan zarrachalar yo‘q.":v?"Noto‘g‘ri. 4-modulda vakuumni tanlab, zarrachalarga qarang.":"Javobni tanlang.")}
+  if(n===5){const v=$("t5i").value;fb("t5",v==="ok",v==="ok"?"To‘g‘ri! Amplituda tovush qattiqligini belgilaydi.":v?"Noto‘g‘ri. 3-modulda amplitudani o‘zgartirib ko‘ring.":"Javobni tanlang.")}});
+/* ---------- module 7: quiz ---------- */
+const Q=[["Tovush nima natijasida hosil bo‘ladi?","Tebranayotgan jismdan",["Sokin jismdan","Faqat suvdan","Qorong‘ulikdan"]],
+["Chastota qaysi birlikda o‘lchanadi?","Gerts (Hz)",["Metr","Kilogramm","Sekund"]],
+["Amplituda nima?","Muvozanat holatidan eng katta chetlanish",["Jismning og‘irligi","Tovush tezligi","Tebranish vaqti"]],
+["Qaysi muhitda tovush tarqalmaydi?","Vakuumda",["Suvda","Havoda","Temirda"]],
+["Chastota ortsa, tovush qanday bo‘ladi?","Ingichkaroq (balandroq)",["Yo‘g‘onroq","O‘zgarmaydi","Qattiqroq"]],
+["Amplituda ortsa, tovush qanday o‘zgaradi?","Qattiqroq bo‘ladi",["Ingichkaroq bo‘ladi","Yo‘qoladi","Yo‘g‘onroq bo‘ladi"]],
+["Tovush qaysi muhitda eng tez tarqaladi?","Qattiq jismda",["Havoda","Vakuumda","Gazda"]],
+["Chastota formulasi qaysi?","f = N / t",["f = t / N","f = N × t","f = N + t"]],
+["Gitara torini chertganda nima tebranadi?","Tor",["Faqat qo‘lingiz","Hech narsa","Faqat yorug‘lik"]],
+["2 sekundda 200 ta tebranish bo‘lsa, chastota nechaga teng?","100 Hz",["50 Hz","200 Hz","400 Hz"]]];
+let key=[];
+function buildQuiz(){const box=$("quiz");box.innerHTML="";key=[];$("qres").textContent="";
+  Q.forEach((q,i)=>{const opts=[q[1],...q[2]].map((t,j)=>({t,r:j===0}));for(let k=opts.length-1;k>0;k--){const r=Math.floor(Math.random()*(k+1));[opts[k],opts[r]]=[opts[r],opts[k]]}
+    key.push(opts.findIndex(o=>o.r));const d=document.createElement("div");d.className="q";
+    d.innerHTML="<b>"+(i+1)+". "+q[0]+"</b>"+opts.map((o,j)=>`<label><input type="radio" name="q${i}" value="${j}"> ${o.t}</label>`).join("");box.appendChild(d)})}
+buildQuiz();
+$("qrst").onclick=buildQuiz;
+$("qsub").onclick=()=>{let s=0,e=0;Q.forEach((q,i)=>{const ls=document.querySelectorAll(`input[name="q${i}"]`),sel=document.querySelector(`input[name="q${i}"]:checked`);
+  ls.forEach(l=>l.parentElement.classList.remove("right","wrong"));ls[key[i]].parentElement.classList.add("right");
+  if(!sel)e++;else if(+sel.value===key[i])s++;else sel.parentElement.classList.add("wrong")});
+  const g=s>=9?"Baho: 5 (a’lo)":s>=7?"Baho: 4 (yaxshi)":s>=5?"Baho: 3 (qoniqarli)":"Baho: 2. Mavzuni qayta ko‘rib chiqing.";
+  $("qres").textContent=`Natija: ${s} / ${Q.length} (${s*10}%). ${g}`+(e?` Javobsiz qolgan savollar: ${e} ta.`:"")};
+/* ---------- main loop ---------- */
+let last=0;
+function loop(ms){const t=ms/1000,dt=Math.min(.05,Math.max(0,t-last));last=t;draw1(t,dt);draw2(t);draw3(t);draw4(t);draw5(t);requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

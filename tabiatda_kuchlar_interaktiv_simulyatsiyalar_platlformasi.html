@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabiatda Kuchlar — Interaktiv Simulyatsiyalar Platlformasi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .tab-btn.active {
+            background-color: #2563eb;
+            color: #ffffff;
+            border-color: #3b82f6;
+            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+        }
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to bottom, #1e293b, #0f172a);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 320px;
+        }
+        /* Custom scrollbar for control panels */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Header Section -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-blue-600 rounded-lg text-white">
+                    <i class="fa-solid font-bold fa-atom text-2xl animate-spin" style="animation-duration: 12s;"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+                        TABIATDA KUCHLAR
+                    </h1>
+                    <p class="text-xs text-slate-400">Interaktiv o‘quv-simulyatsiya platformasi</p>
+                </div>
+            </div>
+
+            <!-- Global Score Board -->
+            <div class="flex items-center space-x-6 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700">
+                <div class="text-center">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Umumiy Ball</span>
+                    <span id="global-score" class="text-xl font-extrabold text-amber-400">0</span>
+                </div>
+                <div class="w-px h-8 bg-slate-700"></div>
+                <div class="text-center">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Urinishlar</span>
+                    <span id="global-attempts" class="text-xl font-extrabold text-blue-400">0</span>
+                </div>
+                <div class="w-px h-8 bg-slate-700"></div>
+                <div class="text-center">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">To‘g‘ri Javoblar</span>
+                    <span id="global-correct" class="text-xl font-extrabold text-emerald-400">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="max-w-7xl mx-auto px-2 overflow-x-auto">
+            <nav class="flex space-x-1 py-2 text-xs md:text-sm font-medium" id="sim-tabs">
+                <button onclick="switchTab('lab')" class="tab-btn active whitespace-nowrap px-3 py-2 rounded-lg transition border border-transparent">
+                    <i class="fa-solid fa-flask mr-1"></i> 1. Kuchlar Laboratoriyasi
+                </button>
+                <button onclick="switchTab('jump')" class="tab-btn whitespace-nowrap px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition border border-transparent">
+                    <i class="fa-solid fa-moon mr-1"></i> 2. Yer va Oyda Sakrash
+                </button>
+                <button onclick="switchTab('friction')" class="tab-btn whitespace-nowrap px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition border border-transparent">
+                    <i class="fa-solid fa-car mr-1"></i> 3. Ishqalanish Chempioni
+                </button>
+                <button onclick="switchTab('spring')" class="tab-btn whitespace-nowrap px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition border border-transparent">
+                    <i class="fa-solid fa-arrows-up-down mr-1"></i> 4. Prujinani Qutqar!
+                </button>
+                <button onclick="switchTab('buoyancy')" class="tab-btn whitespace-nowrap px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition border border-transparent">
+                    <i class="fa-solid fa-water mr-1"></i> 5. Arximed Kuchi
+                </button>
+                <button onclick="switchTab('tugofwar')" class="tab-btn whitespace-nowrap px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition border border-transparent">
+                    <i class="fa-solid fa-people-pulling mr-1"></i> 6. Kuchlar Jangi
+                </button>
+                <button onclick="switchTab('quiz')" class="tab-btn whitespace-nowrap px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition border border-transparent">
+                    <i class="fa-solid fa-graduation-cap mr-1"></i> 7. Yakuniy Viktorina
+                </button>
+                <button onclick="switchTab('methodology')" class="tab-btn whitespace-nowrap px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition border border-transparent">
+                    <i class="fa-solid fa-book-open mr-1"></i> Metodik Qo‘llanma
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- TAB 1: KUCHLAR LABORATORIYASI -->
+        <div id="tab-lab" class="tab-content block space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Simulation Canvas -->
+                <div class="lg:col-span-2 glass-panel p-4 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-lg font-bold text-blue-400"><i class="fa-solid fa-truck-ramp-box mr-2"></i>Aravacha va Tortish Kuchi</h2>
+                            <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700">Nyutonning II Qonuni: F = m·a</span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvas-lab"></canvas>
+                        </div>
+                    </div>
+                    <!-- Live Dynamic Values Display -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-center">
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Natijaviy Kuch (F<sub>nat</sub>)</span>
+                            <span id="lab-val-fnet" class="text-lg font-bold text-emerald-400">0.0 N</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Ishqalanish (F<sub>ishq</sub>)</span>
+                            <span id="lab-val-fishq" class="text-lg font-bold text-rose-400">0.0 N</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Tezlanish (a)</span>
+                            <span id="lab-val-a" class="text-lg font-bold text-amber-400">0.00 m/s²</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Tezlik (v)</span>
+                            <span id="lab-val-v" class="text-lg font-bold text-cyan-400">0.00 m/s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls & Settings -->
+                <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                    <h3 class="text-md font-bold text-slate-200 border-b border-slate-700 pb-2">Tajriba Parametrlari</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <label class="text-slate-300">Yuk massasi (m):</label>
+                                <span id="lab-lbl-mass" class="font-bold text-blue-400">5 kg</span>
+                            </div>
+                            <input type="range" id="lab-slider-mass" min="1" max="20" value="5" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <label class="text-slate-300">Tashqi Kuch (F):</label>
+                                <span id="lab-lbl-force" class="font-bold text-indigo-400">25 N</span>
+                            </div>
+                            <input type="range" id="lab-slider-force" min="0" max="100" value="25" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-slate-300 block mb-1">Sirt turi (Ishqalanish koeffitsiyenti μ):</label>
+                            <select id="lab-select-surface" class="w-full bg-slate-800 text-slate-200 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500">
+                                <option value="0.05">Muzli sirt (μ = 0.05)</option>
+                                <option value="0.30" selected>Yog‘och sirt (μ = 0.30)</option>
+                                <option value="0.65">G‘adir-budur sirt (μ = 0.65)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3 pt-2">
+                        <button id="lab-btn-start" onclick="labStart()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-play"></i> Tajriba o‘tkazish
+                        </button>
+                        <button onclick="labReset()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold px-4 py-2.5 rounded-xl transition">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini Quiz Section -->
+            <div class="glass-panel p-5 rounded-2xl">
+                <h3 class="text-md font-bold text-amber-400 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question"></i> Laboratoriya bo‘yicha bilimingizni sinang
+                </h3>
+                <div id="lab-quiz-container" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: OYDA VA YERDA SAKRASH -->
+        <div id="tab-jump" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Canvas Area -->
+                <div class="lg:col-span-2 glass-panel p-4 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-lg font-bold text-indigo-400"><i class="fa-solid fa-person-running mr-2"></i>Gravitatsiya va Sakrash Balandligi</h2>
+                            <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700">h = v₀² / (2g) & F = m·g</span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvas-jump"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic output values -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-center">
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Og‘irlik Kuchi (F)</span>
+                            <span id="jump-val-f" class="text-lg font-bold text-indigo-400">686.7 N</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Maks. Balandlik (h)</span>
+                            <span id="jump-val-h" class="text-lg font-bold text-emerald-400">1.27 m</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Parvoz Vaqti (t)</span>
+                            <span id="jump-val-t" class="text-lg font-bold text-amber-400">1.02 s</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Erkin Tushish Tezlanishi (g)</span>
+                            <span id="jump-val-g" class="text-lg font-bold text-cyan-400">9.81 m/s²</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                    <h3 class="text-md font-bold text-slate-200 border-b border-slate-700 pb-2">Sharoit va Odam Parametrlari</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm text-slate-300 block mb-2">Samoviy Jism (Sharoit):</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button id="btn-env-earth" onclick="setJumpEnv('earth')" class="py-2 px-3 rounded-xl border border-blue-500 bg-blue-600/30 font-semibold text-white flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-earth-americas text-blue-400"></i> Yer (9.81 m/s²)
+                                </button>
+                                <button id="btn-env-moon" onclick="setJumpEnv('moon')" class="py-2 px-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-moon text-amber-200"></i> Oy (1.62 m/s²)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <label class="text-slate-300">Odam massasi (m):</label>
+                                <span id="jump-lbl-mass" class="font-bold text-blue-400">70 kg</span>
+                            </div>
+                            <input type="range" id="jump-slider-mass" min="30" max="120" value="70" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <label class="text-slate-300">Boshlang‘ich Sakrash Tezligi (v₀):</label>
+                                <span id="jump-lbl-v0" class="font-bold text-emerald-400">5.0 m/s</span>
+                            </div>
+                            <input type="range" id="jump-slider-v0" min="2" max="10" step="0.5" value="5" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3 pt-2">
+                        <button onclick="jumpStart()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-arrow-up-from-ground-water"></i> Sakrash
+                        </button>
+                        <button onclick="jumpReset()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold px-4 py-2.5 rounded-xl transition">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div class="glass-panel p-5 rounded-2xl">
+                <h3 class="text-md font-bold text-amber-400 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question"></i> Gravitatsiya va massa bo‘yicha savollar
+                </h3>
+                <div id="jump-quiz-container" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: ISHQALANISH CHEMPIONI -->
+        <div id="tab-friction" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Canvas Area -->
+                <div class="lg:col-span-2 glass-panel p-4 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-lg font-bold text-red-400"><i class="fa-solid fa-car-tunnel mr-2"></i>Avtomobil Tormoz Yo‘li</h2>
+                            <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700">S = v² / (2·μ·g)</span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvas-friction"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic stats -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-center">
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">To‘xtash Masofasi (S)</span>
+                            <span id="fric-val-s" class="text-lg font-bold text-rose-400">0.0 m</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Tormozlanish Vaqti (t)</span>
+                            <span id="fric-val-t" class="text-lg font-bold text-amber-400">0.0 s</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Ishqalanish Koeff. (μ)</span>
+                            <span id="fric-val-mu" class="text-lg font-bold text-cyan-400">0.70</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Manfiy Tezlanish (a)</span>
+                            <span id="fric-val-a" class="text-lg font-bold text-purple-400">6.87 m/s²</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                    <h3 class="text-md font-bold text-slate-200 border-b border-slate-700 pb-2">Harakat Tayyorgarligi</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm text-slate-300 block mb-1">Yo‘l Yuzasi Sharoiti:</label>
+                            <select id="fric-select-road" class="w-full bg-slate-800 text-slate-200 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-red-500">
+                                <option value="0.70" selected>Quruq asfalt (μ = 0.70)</option>
+                                <option value="0.35">Yomg‘irli / Xo‘l yo‘l (μ = 0.35)</option>
+                                <option value="0.10">Muzlagan yo‘l (μ = 0.10)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <label class="text-slate-300">Avtomobil Tezligi (v):</label>
+                                <span id="fric-lbl-speed" class="font-bold text-red-400">60 km/soat</span>
+                            </div>
+                            <input type="range" id="fric-slider-speed" min="20" max="140" step="10" value="60" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-red-500">
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3 pt-2">
+                        <button id="fric-btn-brake" onclick="frictionStart()" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-ban"></i> TORMOZLASH!
+                        </button>
+                        <button onclick="frictionReset()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold px-4 py-2.5 rounded-xl transition">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div class="glass-panel p-5 rounded-2xl">
+                <h3 class="text-md font-bold text-amber-400 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question"></i> Yo‘l xavfsizligi va ishqalanish testi
+                </h3>
+                <div id="fric-quiz-container" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: PRUJINANI QUTQAR! -->
+        <div id="tab-spring" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Canvas Area -->
+                <div class="lg:col-span-2 glass-panel p-4 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-arrows-up-down-left-right mr-2"></i>Guk Qonuni va Prujina Deformatsiyasi</h2>
+                            <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700">F = k·x</span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvas-spring"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Values -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-center">
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Elastiklik Kuchi (F)</span>
+                            <span id="spring-val-f" class="text-lg font-bold text-emerald-400">19.62 N</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Cho‘zilish (x)</span>
+                            <span id="spring-val-x" class="text-lg font-bold text-amber-400">0.20 m</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Bikirlik (k)</span>
+                            <span id="spring-val-k" class="text-lg font-bold text-cyan-400">100 N/m</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Holat</span>
+                            <span id="spring-val-status" class="text-sm font-bold text-emerald-400">Elastik</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                    <h3 class="text-md font-bold text-slate-200 border-b border-slate-700 pb-2">Prujina va Yuk Sozlamalari</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <label class="text-slate-300">Osilgan Yuk Massasi (m):</label>
+                                <span id="spring-lbl-mass" class="font-bold text-emerald-400">2.0 kg</span>
+                            </div>
+                            <input type="range" id="spring-slider-mass" min="0.5" max="8.0" step="0.5" value="2.0" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <label class="text-slate-300">Prujina Bikirligi (k):</label>
+                                <span id="spring-lbl-k" class="font-bold text-cyan-400">100 N/m</span>
+                            </div>
+                            <input type="range" id="spring-slider-k" min="30" max="300" step="10" value="100" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+                        </div>
+
+                        <!-- Target challenge box -->
+                        <div class="p-3 bg-slate-900/90 rounded-xl border border-amber-500/30 text-xs space-y-1">
+                            <span class="text-amber-400 font-bold block"><i class="fa-solid fa-bullseye mr-1"></i> Maxsus Topshiriq:</span>
+                            <p class="text-slate-300">Prujinani roppa-rosa <b class="text-white">x = 0.25 m (25 cm)</b> cho‘zish uchun k = 100 N/m bo‘lganda qancha massa kerak?</p>
+                            <button onclick="checkSpringChallenge()" class="mt-2 w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold py-1.5 rounded-lg transition">Tekshirish</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div class="glass-panel p-5 rounded-2xl">
+                <h3 class="text-md font-bold text-amber-400 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question"></i> Guk qonuni testi
+                </h3>
+                <div id="spring-quiz-container" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- TAB 5: ARXIMED KUCHI -->
+        <div id="tab-buoyancy" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Canvas Area -->
+                <div class="lg:col-span-2 glass-panel p-4 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-lg font-bold text-cyan-400"><i class="fa-solid fa-water mr-2"></i>Suyuqlikda Jismlarning Suzishi</h2>
+                            <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700">F<sub>A</sub> = ρ<sub>suyuqlik</sub>·g·V<sub>botgan</sub></span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvas-buoyancy"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-center">
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Arximed Kuchi (F<sub>A</sub>)</span>
+                            <span id="buoy-val-fa" class="text-lg font-bold text-cyan-400">0.0 N</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Og‘irlik Kuchi (F<sub>g</sub>)</span>
+                            <span id="buoy-val-fg" class="text-lg font-bold text-rose-400">0.0 N</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Jism Zichligi (ρ)</span>
+                            <span id="buoy-val-rho" class="text-lg font-bold text-amber-400">600 kg/m³</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Holat</span>
+                            <span id="buoy-val-status" class="text-sm font-bold text-emerald-400">Yuzada suzadi</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                    <h3 class="text-md font-bold text-slate-200 border-b border-slate-700 pb-2">Jism va Suyuqlikni Tanlang</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm text-slate-300 block mb-1">Jism materialini tanlang:</label>
+                            <select id="buoy-select-material" onchange="updateBuoyancyParams()" class="w-full bg-slate-800 text-slate-200 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-cyan-500">
+                                <option value="wood" selected>Yog‘och (ρ = 600 kg/m³)</option>
+                                <option value="plastic">Plastik (ρ = 920 kg/m³)</option>
+                                <option value="brick">Tosh / G‘isht (ρ = 2400 kg/m³)</option>
+                                <option value="iron">Temir (ρ = 7800 kg/m³)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <label class="text-slate-300">Jism hajmi (V):</label>
+                                <span id="buoy-lbl-vol" class="font-bold text-cyan-400">0.002 m³ (2 litr)</span>
+                            </div>
+                            <input type="range" id="buoy-slider-vol" min="0.001" max="0.005" step="0.0005" value="0.002" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-slate-300 block mb-1">Suyuqlik turi:</label>
+                            <select id="buoy-select-fluid" onchange="updateBuoyancyParams()" class="w-full bg-slate-800 text-slate-200 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-cyan-500">
+                                <option value="1000" selected>Toza Suv (ρ = 1000 kg/m³)</option>
+                                <option value="1030">Dengiz Suvi (ρ = 1030 kg/m³)</option>
+                                <option value="800">Kerosin / Yog‘ (ρ = 800 kg/m³)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button onclick="dropBuoyancyObject()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-2.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-water-ladder"></i> Jismni Suvga Tashlash
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div class="glass-panel p-5 rounded-2xl">
+                <h3 class="text-md font-bold text-amber-400 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question"></i> Arximed qonuni testi
+                </h3>
+                <div id="buoy-quiz-container" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- TAB 6: KUCHLAR JANGI -->
+        <div id="tab-tugofwar" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Canvas Area -->
+                <div class="lg:col-span-2 glass-panel p-4 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-lg font-bold text-purple-400"><i class="fa-solid fa-people-pulling mr-2"></i>Arqon Tortish va Natijaviy Kuch</h2>
+                            <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700">F<sub>nat</sub> = F<sub>chap</sub> - F<sub>o'ng</sub></span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvas-tug"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic stats -->
+                    <div class="grid grid-cols-3 gap-3 mt-4 text-center">
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Chap Jamoa Kuchi</span>
+                            <span id="tug-val-f1" class="text-lg font-bold text-blue-400">100 N</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Natijaviy Kuch (F<sub>nat</sub>)</span>
+                            <span id="tug-val-fnet" class="text-lg font-bold text-amber-400">0 N</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">O‘ng Jamoa Kuchi</span>
+                            <span id="tug-val-f2" class="text-lg font-bold text-rose-400">100 N</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                    <h3 class="text-md font-bold text-slate-200 border-b border-slate-700 pb-2">Jamoalar Kuchini Sozlang</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <label class="text-blue-400 font-semibold">Chap Jamoa (F₁):</label>
+                                <span id="tug-lbl-f1" class="font-bold text-blue-400">100 N</span>
+                            </div>
+                            <input type="range" id="tug-slider-f1" min="0" max="300" step="10" value="100" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <label class="text-rose-400 font-semibold">O‘ng Jamoa (F₂):</label>
+                                <span id="tug-lbl-f2" class="font-bold text-rose-400">100 N</span>
+                            </div>
+                            <input type="range" id="tug-slider-f2" min="0" max="300" step="10" value="100" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-rose-500">
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3 pt-2">
+                        <button onclick="tugStart()" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-play"></i> Boshlash!
+                        </button>
+                        <button onclick="tugReset()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold px-4 py-2.5 rounded-xl transition">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div class="glass-panel p-5 rounded-2xl">
+                <h3 class="text-md font-bold text-amber-400 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question"></i> Vektor kuchlar va muvozanat testi
+                </h3>
+                <div id="tug-quiz-container" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- TAB 7: YAKUNIY VIKTORINA -->
+        <div id="tab-quiz" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl max-w-4xl mx-auto space-y-6">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+                            <i class="fa-solid fa-trophy"></i> Yakuniy Bilimlar Imtihoni
+                        </h2>
+                        <p class="text-xs text-slate-400">Barcha 6 ta modul bo‘yicha 15 ta kompleks savol</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 block">Taraqqiyot:</span>
+                        <span id="quiz-progress" class="text-lg font-bold text-blue-400">1 / 15</span>
+                    </div>
+                </div>
+
+                <!-- Quiz Card Container -->
+                <div id="final-quiz-card" class="space-y-6">
+                    <!-- Dynamic Question Inserted via JS -->
+                </div>
+
+                <!-- Navigation buttons -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-700">
+                    <button id="quiz-btn-prev" onclick="quizPrevQuestion()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2 rounded-xl transition text-sm disabled:opacity-50">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Oldingisi
+                    </button>
+                    <button id="quiz-btn-next" onclick="quizNextQuestion()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-2 rounded-xl transition text-sm">
+                        Keyingisi <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Final Result Modal/Card (Hidden by default) -->
+            <div id="quiz-result-card" class="hidden glass-panel p-8 rounded-2xl max-w-2xl mx-auto text-center space-y-6 border border-amber-500/30">
+                <div class="w-20 h-20 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-4xl">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white">Viktorina Yakunlandi!</h3>
+                <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                    <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400 block">Natijangiz</span>
+                        <span id="quiz-final-score" class="text-3xl font-extrabold text-amber-400">0%</span>
+                    </div>
+                    <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400 block">To‘g‘ri Javoblar</span>
+                        <span id="quiz-final-correct" class="text-3xl font-extrabold text-emerald-400">0 / 15</span>
+                    </div>
+                </div>
+
+                <div id="quiz-recommendations" class="text-left bg-slate-900/60 p-4 rounded-xl text-xs space-y-2 text-slate-300 border border-slate-800">
+                    <!-- Dynamic recommendation text -->
+                </div>
+
+                <button onclick="restartFullQuiz()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-8 py-3 rounded-xl transition shadow-lg">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> Qaytadan topshirish
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB 8: METODIK QO‘LLANMA -->
+        <div id="tab-methodology" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl max-w-5xl mx-auto space-y-6 text-slate-200">
+                <div class="border-b border-slate-700 pb-4">
+                    <h2 class="text-2xl font-bold text-blue-400 flex items-center gap-2">
+                        <i class="fa-solid fa-book-open-reader"></i> Pedagogik Metodik Qo‘llanma
+                    </h2>
+                    <p class="text-sm text-slate-400">Oliy ta’lim o‘qituvchilari va talabalari uchun "Tabiatda Kuchlar" modulini o‘qitish metodikasi</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <h3 class="text-md font-bold text-emerald-400 flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye"></i> 1. Ta’limiy Maqsadlar
+                        </h3>
+                        <ul class="list-disc list-inside text-slate-300 space-y-1">
+                            <li>Talabalarda kuch tushunchasi va ularning turlari (og‘irlik, elastiklik, ishqalanish, Arximed, natijaviy) bo‘yicha chuqur ilmiy dunyoqarashni shakllantirish.</li>
+                            <li>Nyuton qonunlari hamda Guk va Arximed qonunlarining matematik-fizik mohiyatini amaliy simulyatsiyalar orqali vizual tushuntirish.</li>
+                            <li>Apreziyatsiyaviy va tajribaviy fikrlash ko‘nikmalarini rivojlantirish.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <h3 class="text-md font-bold text-indigo-400 flex items-center gap-2">
+                            <i class="fa-solid fa-brain"></i> 2. Shakllantiriladigan Kompetensiyalar
+                        </h3>
+                        <ul class="list-disc list-inside text-slate-300 space-y-1">
+                            <li><b>Ilmiy-tadqiqotchilik:</b> Parametrlarni o‘zgartirib gipotezalarni sinash va natijalarni tahlil qilish.</li>
+                            <li><b>Raqamli/Pedagogik:</b> Zamonaviy interaktiv simulyatsion dasturlardan o‘quv jarayonida foydalana olish.</li>
+                            <li><b>Muammoli fikrlash:</b> Fizik hodisalardagi sabab-o‘qibat bog‘liqliklarini aniqlash.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3 text-sm">
+                    <h3 class="text-md font-bold text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-timeline"></i> 3. Dars Ning Qaysi Bosqichida Qo‘llash Mumkin?
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="p-3 bg-slate-800/80 rounded-lg">
+                            <span class="font-bold text-blue-300 block mb-1">Yangi Mavzu Bayoni:</span>
+                            Mavzuni tushuntirishda vizual namoyish (demonstratsiya) vositasi sifatida.
+                        </div>
+                        <div class="p-3 bg-slate-800/80 rounded-lg">
+                            <span class="font-bold text-emerald-300 block mb-1">Mustahkamlash:</span>
+                            Talabalar individual ravishda mini-laboratoriyalarni bajarib, mini-testlarni yechadi.
+                        </div>
+                        <div class="p-3 bg-slate-800/80 rounded-lg">
+                            <span class="font-bold text-purple-300 block mb-1">Nazorat va Baholash:</span>
+                            Yakuniy 15 savolli viktorina orqali bilimlarni avtomatik diagnostika qilish.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-2 text-sm">
+                    <h3 class="text-md font-bold text-rose-400 flex items-center gap-2">
+                        <i class="fa-solid fa-comments"></i> 4. Talabalarga Beriladigan Muammoli Savollar (Problem-Based Learning)
+                    </h3>
+                    <ol class="list-decimal list-inside text-slate-300 space-y-1">
+                        <li>Nima uchun yomg‘ir yog‘ganda avtomobillarning tormoz yo‘li keskin uzayadi? Ishqalanish koeffitsiyenti buni qanday izohlaydi?</li>
+                        <li>Agar kema ulkan po‘lat va temirdan yasalgan bo‘lsa, nima uchun suv tubiga cho‘kib ketmaydi?</li>
+                        <li>Fazagichda og‘irlik kuchi nol bo‘lganda prujina tarozisidan foydalanib massani o‘lchasa bo‘ladimi?</li>
+                    </ol>
+                </div>
+
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-2 text-sm">
+                    <h3 class="text-md font-bold text-cyan-400 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line"></i> 5. Baholash Mezonlari (Rubrikalar)
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse border border-slate-700 text-xs">
+                            <thead>
+                                <tr class="bg-slate-800 text-slate-200">
+                                    <th class="p-2 border border-slate-700">Ball Range</th>
+                                    <th class="p-2 border border-slate-700">Daraja</th>
+                                    <th class="p-2 border border-slate-700">Tavsif</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-slate-300">
+                                <tr>
+                                    <td class="p-2 border border-slate-700 font-bold text-emerald-400">85 - 100%</td>
+                                    <td class="p-2 border border-slate-700">A'lo (A’lo darajadagi bilim)</td>
+                                    <td class="p-2 border border-slate-700">Fizik qonuniyatlarni va ularning amaliy bog‘liqligini to‘liq tushungan.</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 border border-slate-700 font-bold text-blue-400">70 - 84%</td>
+                                    <td class="p-2 border border-slate-700">Yaxshi</td>
+                                    <td class="p-2 border border-slate-700">Asosiy qonunlarni biladi, lekin hisoblashda yoki qiyin savollarda biroz xatolikka yo‘l qo‘yadi.</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 border border-slate-700 font-bold text-amber-400">50 - 69%</td>
+                                    <td class="p-2 border border-slate-700">Qoniqarli</td>
+                                    <td class="p-2 border border-slate-700">Sirtqi tushunchaga ega, qo‘shimcha simulyatsiya va takrorlash talab etiladi.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+        <p>© 2026 Tabiiy Fanlarni O‘qitish Metodikasi — "Tabiatda Kuchlar" Interaktiv Dasturi.</p>
+    </footer>
+
+    <!-- JAVASCRIPT PHYSICS ENGINE AND SIMULATION LOGIC -->
+    <script>
+        // Global State & Scoring
+        let globalScore = 0;
+        let globalAttempts = 0;
+        let globalCorrect = 0;
+
+        function updateScoreBoard() {
+            document.getElementById('global-score').innerText = globalScore;
+            document.getElementById('global-attempts').innerText = globalAttempts;
+            document.getElementById('global-correct').innerText = globalCorrect;
+        }
+
+        function recordAttempt(isCorrect, points = 10) {
+            globalAttempts++;
+            if (isCorrect) {
+                globalCorrect++;
+                globalScore += points;
+            }
+            updateScoreBoard();
+        }
+
+        // TAB SWITCHING LOGIC
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            document.querySelectorAll('#sim-tabs .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-slate-300');
+            });
+            event.currentTarget.classList.add('active');
+            event.currentTarget.classList.remove('text-slate-300');
+
+            // Resize and redraw active canvas
+            setTimeout(() => {
+                initActiveTabCanvas(tabId);
+            }, 50);
+        }
+
+        function initActiveTabCanvas(tabId) {
+            if (tabId === 'lab') labDraw();
+            if (tabId === 'jump') jumpDraw();
+            if (tabId === 'friction') frictionDraw();
+            if (tabId === 'spring') springDraw();
+            if (tabId === 'buoyancy') buoyancyDraw();
+            if (tabId === 'tugofwar') tugDraw();
+        }
+
+        // ==========================================
+        // 1. KUCHLAR LABORATORIYASI SIMULATION
+        // ==========================================
+        const labCanvas = document.getElementById('canvas-lab');
+        const labCtx = labCanvas.getContext('2d');
+
+        let labState = {
+            m: 5,
+            F: 25,
+            mu: 0.30,
+            x: 50,
+            v: 0,
+            a: 0,
+            Fnet: 0,
+            Fishq: 0,
+            animating: false,
+            lastTime: 0
+        };
+
+        function labCalculate() {
+            const g = 9.81;
+            labState.Fishq = labState.mu * labState.m * g;
+            if (labState.F > labState.Fishq) {
+                labState.Fnet = labState.F - labState.Fishq;
+                labState.a = labState.Fnet / labState.m;
+            } else {
+                labState.Fnet = 0;
+                labState.a = 0;
+            }
+
+            document.getElementById('lab-val-fnet').innerText = labState.Fnet.toFixed(1) + ' N';
+            document.getElementById('lab-val-fishq').innerText = labState.Fishq.toFixed(1) + ' N';
+            document.getElementById('lab-val-a').innerText = labState.a.toFixed(2) + ' m/s²';
+            document.getElementById('lab-val-v').innerText = labState.v.toFixed(2) + ' m/s';
+        }
+
+        function labDraw() {
+            labCanvas.width = labCanvas.parentElement.clientWidth;
+            labCanvas.height = 320;
+
+            const w = labCanvas.width;
+            const h = labCanvas.height;
+
+            labCtx.clearRect(0, 0, w, h);
+
+            // Ground surface
+            const groundY = h - 60;
+            labCtx.fillStyle = labState.mu === 0.05 ? '#38bdf8' : (labState.mu === 0.30 ? '#d97706' : '#475569');
+            labCtx.fillRect(0, groundY, w, 60);
+
+            // Ground pattern details
+            labCtx.strokeStyle = '#0f172a';
+            labCtx.lineWidth = 2;
+            for(let i=0; i<w; i+=20) {
+                labCtx.beginPath();
+                labCtx.moveTo(i, groundY);
+                labCtx.lineTo(i - 10, groundY + 15);
+                labCtx.stroke();
+            }
+
+            // Cart position
+            const cartW = 100 + labState.m * 3;
+            const cartH = 50;
+            const cartY = groundY - cartH - 12; // 12px for wheels
+            const cartX = labState.x % (w - cartW - 40);
+
+            // Draw Cart
+            labCtx.fillStyle = '#2563eb';
+            labCtx.beginPath();
+            labCtx.roundRect(cartX, cartY, cartW, cartH, 8);
+            labCtx.fill();
+            labCtx.strokeStyle = '#60a5fa';
+            labCtx.lineWidth = 2;
+            labCtx.stroke();
+
+            // Wheels
+            labCtx.fillStyle = '#0284c7';
+            labCtx.beginPath();
+            labCtx.arc(cartX + 20, groundY - 8, 10, 0, Math.PI * 2);
+            labCtx.arc(cartX + cartW - 20, groundY - 8, 10, 0, Math.PI * 2);
+            labCtx.fill();
+
+            // Mass label inside cart
+            labCtx.fillStyle = '#ffffff';
+            labCtx.font = 'bold 14px Inter';
+            labCtx.textAlign = 'center';
+            labCtx.fillText(labState.m + ' kg', cartX + cartW/2, cartY + cartH/2 + 5);
+
+            // Force Arrows (Vectors)
+            // Applied Force F (Right)
+            if (labState.F > 0) {
+                drawArrow(labCtx, cartX + cartW, cartY + cartH/2, cartX + cartW + Math.min(labState.F * 1.5, 120), cartY + cartH/2, '#10b981', 'F = ' + labState.F + 'N');
+            }
+            // Friction Force Fishq (Left)
+            if (labState.Fishq > 0) {
+                drawArrow(labCtx, cartX, cartY + cartH - 5, cartX - Math.min(labState.Fishq * 1.5, 100), cartY + cartH - 5, '#f43f5e', 'F_ishq = ' + labState.Fishq.toFixed(1) + 'N');
+            }
+        }
+
+        function drawArrow(ctx, fromx, fromy, tox, toy, color, label) {
+            const headlen = 10;
+            const dx = tox - fromx;
+            const dy = toy - fromy;
+            const angle = Math.atan2(dy, dx);
+
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 4;
+
+            ctx.beginPath();
+            ctx.moveTo(fromx, fromy);
+            ctx.lineTo(tox, toy);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.lineTo(tox, toy);
+            ctx.fill();
+
+            if (label) {
+                ctx.font = 'bold 12px Inter';
+                ctx.fillText(label, tox + (dx > 0 ? 10 : -40), toy - 8);
+            }
+        }
+
+        function labAnimate(timestamp) {
+            if (!labState.animating) return;
+            if (!labState.lastTime) labState.lastTime = timestamp;
+            const dt = (timestamp - labState.lastTime) / 1000;
+            labState.lastTime = timestamp;
+
+            if (dt < 0.2) {
+                labState.v += labState.a * dt;
+                labState.x += labState.v * dt * 40; // pixel scaling
+            }
+
+            labCalculate();
+            labDraw();
+
+            if (labState.x > labCanvas.width + 200) {
+                labReset();
+            } else {
+                requestAnimationFrame(labAnimate);
+            }
+        }
+
+        function labStart() {
+            if (labState.animating) return;
+            labState.animating = true;
+            labState.lastTime = 0;
+            requestAnimationFrame(labAnimate);
+        }
+
+        function labReset() {
+            labState.animating = false;
+            labState.x = 50;
+            labState.v = 0;
+            labCalculate();
+            labDraw();
+        }
+
+        // Dynamic event listeners for lab sliders
+        document.getElementById('lab-slider-mass').addEventListener('input', (e) => {
+            labState.m = parseFloat(e.target.value);
+            document.getElementById('lab-lbl-mass').innerText = labState.m + ' kg';
+            labCalculate();
+            labDraw();
+        });
+
+        document.getElementById('lab-slider-force').addEventListener('input', (e) => {
+            labState.F = parseFloat(e.target.value);
+            document.getElementById('lab-lbl-force').innerText = labState.F + ' N';
+            labCalculate();
+            labDraw();
+        });
+
+        document.getElementById('lab-select-surface').addEventListener('change', (e) => {
+            labState.mu = parseFloat(e.target.value);
+            labCalculate();
+            labDraw();
+        });
+
+        // ==========================================
+        // 2. OYDA VA YERDA SAKRASH SIMULATION
+        // ==========================================
+        const jumpCanvas = document.getElementById('canvas-jump');
+        const jumpCtx = jumpCanvas.getContext('2d');
+
+        let jumpState = {
+            env: 'earth', // 'earth' or 'moon'
+            g: 9.81,
+            m: 70,
+            v0: 5.0,
+            y: 0,
+            v: 0,
+            t: 0,
+            animating: false,
+            lastTime: 0
+        };
+
+        function setJumpEnv(env) {
+            jumpState.env = env;
+            if (env === 'earth') {
+                jumpState.g = 9.81;
+                document.getElementById('btn-env-earth').className = "py-2 px-3 rounded-xl border border-blue-500 bg-blue-600/30 font-semibold text-white flex items-center justify-center gap-2";
+                document.getElementById('btn-env-moon').className = "py-2 px-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold flex items-center justify-center gap-2";
+            } else {
+                jumpState.g = 1.62;
+                document.getElementById('btn-env-moon').className = "py-2 px-3 rounded-xl border border-amber-500 bg-amber-600/30 font-semibold text-white flex items-center justify-center gap-2";
+                document.getElementById('btn-env-earth').className = "py-2 px-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold flex items-center justify-center gap-2";
+            }
+            jumpCalculate();
+            jumpDraw();
+        }
+
+        function jumpCalculate() {
+            const F = jumpState.m * jumpState.g;
+            const h = (jumpState.v0 * jumpState.v0) / (2 * jumpState.g);
+            const totalT = (2 * jumpState.v0) / jumpState.g;
+
+            document.getElementById('jump-val-f').innerText = F.toFixed(1) + ' N';
+            document.getElementById('jump-val-h').innerText = h.toFixed(2) + ' m';
+            document.getElementById('jump-val-t').innerText = totalT.toFixed(2) + ' s';
+            document.getElementById('jump-val-g').innerText = jumpState.g.toFixed(2) + ' m/s²';
+        }
+
+        function jumpDraw() {
+            jumpCanvas.width = jumpCanvas.parentElement.clientWidth;
+            jumpCanvas.height = 320;
+
+            const w = jumpCanvas.width;
+            const h = jumpCanvas.height;
+
+            jumpCtx.clearRect(0, 0, w, h);
+
+            // Sky / Space background
+            if (jumpState.env === 'moon') {
+                jumpCtx.fillStyle = '#020617';
+                jumpCtx.fillRect(0, 0, w, h);
+                // Stars
+                jumpCtx.fillStyle = '#ffffff';
+                for(let i=0; i<30; i++) {
+                    jumpCtx.fillRect((i*37)%w, (i*23)%h, 2, 2);
+                }
+            } else {
+                jumpCtx.fillStyle = '#0f172a';
+                jumpCtx.fillRect(0, 0, w, h);
+            }
+
+            // Ground
+            const groundY = h - 50;
+            jumpCtx.fillStyle = jumpState.env === 'earth' ? '#15803d' : '#64748b';
+            jumpCtx.fillRect(0, groundY, w, 50);
+
+            // Height Scale Meter
+            jumpCtx.strokeStyle = '#38bdf8';
+            jumpCtx.lineWidth = 2;
+            jumpCtx.beginPath();
+            jumpCtx.moveTo(40, groundY);
+            jumpCtx.lineTo(40, 20);
+            jumpCtx.stroke();
+
+            for(let i=0; i<=15; i+=3) {
+                const yPos = groundY - i * 15;
+                if (yPos > 20) {
+                    jumpCtx.fillStyle = '#94a3b8';
+                    jumpCtx.font = '10px Inter';
+                    jumpCtx.fillText(i + 'm', 15, yPos + 3);
+                    jumpCtx.fillRect(35, yPos, 10, 1);
+                }
+            }
+
+            // Person Drawing
+            const pixelY = groundY - jumpState.y * 15 - 50; // 15px per meter scale
+            const personX = w / 2;
+
+            // Draw Stick figure
+            jumpCtx.strokeStyle = '#f8fafc';
+            jumpCtx.lineWidth = 3;
+
+            // Head
+            jumpCtx.beginPath();
+            jumpCtx.arc(personX, pixelY, 12, 0, Math.PI * 2);
+            jumpCtx.stroke();
+            // Body
+            jumpCtx.beginPath();
+            jumpCtx.moveTo(personX, pixelY + 12);
+            jumpCtx.lineTo(personX, pixelY + 35);
+            jumpCtx.stroke();
+            // Arms
+            jumpCtx.beginPath();
+            jumpCtx.moveTo(personX - 15, pixelY + 20);
+            jumpCtx.lineTo(personX + 15, pixelY + 20);
+            jumpCtx.stroke();
+            // Legs
+            jumpCtx.beginPath();
+            jumpCtx.moveTo(personX, pixelY + 35);
+            jumpCtx.lineTo(personX - 10, pixelY + 50);
+            jumpCtx.moveTo(personX, pixelY + 35);
+            jumpCtx.lineTo(personX + 10, pixelY + 50);
+            jumpCtx.stroke();
+
+            // Current Height Indicator
+            jumpCtx.fillStyle = '#f59e0b';
+            jumpCtx.font = 'bold 12px Inter';
+            jumpCtx.fillText('h = ' + jumpState.y.toFixed(2) + ' m', personX + 25, pixelY + 25);
+        }
+
+        function jumpAnimate(timestamp) {
+            if (!jumpState.animating) return;
+            if (!jumpState.lastTime) jumpState.lastTime = timestamp;
+            const dt = (timestamp - jumpState.lastTime) / 1000;
+            jumpState.lastTime = timestamp;
+
+            if (dt < 0.2) {
+                jumpState.t += dt * 1.5; // simulation speed multiplier
+                jumpState.v = jumpState.v0 - jumpState.g * jumpState.t;
+                jumpState.y = jumpState.v0 * jumpState.t - 0.5 * jumpState.g * jumpState.t * jumpState.t;
+
+                if (jumpState.y <= 0) {
+                    jumpState.y = 0;
+                    jumpState.animating = false;
+                }
+            }
+
+            jumpDraw();
+
+            if (jumpState.animating) {
+                requestAnimationFrame(jumpAnimate);
+            }
+        }
+
+        function jumpStart() {
+            if (jumpState.animating) return;
+            jumpState.y = 0;
+            jumpState.t = 0;
+            jumpState.v = jumpState.v0;
+            jumpState.animating = true;
+            jumpState.lastTime = 0;
+            requestAnimationFrame(jumpAnimate);
+        }
+
+        function jumpReset() {
+            jumpState.animating = false;
+            jumpState.y = 0;
+            jumpState.t = 0;
+            jumpCalculate();
+            jumpDraw();
+        }
+
+        document.getElementById('jump-slider-mass').addEventListener('input', (e) => {
+            jumpState.m = parseFloat(e.target.value);
+            document.getElementById('jump-lbl-mass').innerText = jumpState.m + ' kg';
+            jumpCalculate();
+            jumpDraw();
+        });
+
+        document.getElementById('jump-slider-v0').addEventListener('input', (e) => {
+            jumpState.v0 = parseFloat(e.target.value);
+            document.getElementById('jump-lbl-v0').innerText = jumpState.v0.toFixed(1) + ' m/s';
+            jumpCalculate();
+            jumpDraw();
+        });
+
+        // ==========================================
+        // 3. ISHQALANISH CHEMPIONI (AVTOMOBIL)
+        // ==========================================
+        const fricCanvas = document.getElementById('canvas-friction');
+        const fricCtx = fricCanvas.getContext('2d');
+
+        let fricState = {
+            mu: 0.70,
+            vKm: 60,
+            x: 50,
+            v: 0,
+            a: 0,
+            braking: false,
+            stopped: false,
+            skidMarks: [],
+            lastTime: 0
+        };
+
+        function frictionCalculate() {
+            const g = 9.81;
+            const vMs = fricState.vKm / 3.6;
+            fricState.a = fricState.mu * g;
+            const stopDist = (vMs * vMs) / (2 * fricState.a);
+            const stopTime = vMs / fricState.a;
+
+            document.getElementById('fric-val-s').innerText = stopDist.toFixed(1) + ' m';
+            document.getElementById('fric-val-t').innerText = stopTime.toFixed(2) + ' s';
+            document.getElementById('fric-val-mu').innerText = fricState.mu.toFixed(2);
+            document.getElementById('fric-val-a').innerText = fricState.a.toFixed(2) + ' m/s²';
+        }
+
+        function frictionDraw() {
+            fricCanvas.width = fricCanvas.parentElement.clientWidth;
+            fricCanvas.height = 320;
+
+            const w = fricCanvas.width;
+            const h = fricCanvas.height;
+
+            fricCtx.clearRect(0, 0, w, h);
+
+            // Road Background
+            const roadY = h - 80;
+            fricCtx.fillStyle = '#1e293b';
+            fricCtx.fillRect(0, roadY, w, 80);
+
+            // Road surface tint depending on friction
+            if (fricState.mu === 0.35) {
+                fricCtx.fillStyle = 'rgba(56, 189, 248, 0.2)'; // wet
+                fricCtx.fillRect(0, roadY, w, 80);
+            } else if (fricState.mu === 0.10) {
+                fricCtx.fillStyle = 'rgba(224, 242, 254, 0.4)'; // ice
+                fricCtx.fillRect(0, roadY, w, 80);
+            }
+
+            // Road markings
+            fricCtx.strokeStyle = '#f59e0b';
+            fricCtx.lineWidth = 3;
+            fricCtx.setLineDash([20, 15]);
+            fricCtx.beginPath();
+            fricCtx.moveTo(0, roadY + 40);
+            fricCtx.lineTo(w, roadY + 40);
+            fricCtx.stroke();
+            fricCtx.setLineDash([]); // reset
+
+            // Skid Marks
+            fricCtx.strokeStyle = '#0f172a';
+            fricCtx.lineWidth = 4;
+            fricState.skidMarks.forEach(pt => {
+                fricCtx.beginPath();
+                fricCtx.moveTo(pt.x, roadY + 65);
+                fricCtx.lineTo(pt.x + 5, roadY + 65);
+                fricCtx.stroke();
+            });
+
+            // Car Drawing
+            const carW = 90;
+            const carH = 40;
+            const carY = roadY + 15;
+            const carX = fricState.x;
+
+            // Body
+            fricCtx.fillStyle = '#ef4444';
+            fricCtx.beginPath();
+            fricCtx.roundRect(carX, carY, carW, carH, 6);
+            fricCtx.fill();
+
+            // Cabin
+            fricCtx.fillStyle = '#991b1b';
+            fricCtx.beginPath();
+            fricCtx.roundRect(carX + 20, carY - 15, carW - 40, 20, 4);
+            fricCtx.fill();
+
+            // Wheels
+            fricCtx.fillStyle = '#0f172a';
+            fricCtx.beginPath();
+            fricCtx.arc(carX + 20, carY + carH, 10, 0, Math.PI * 2);
+            fricCtx.arc(carX + carW - 20, carY + carH, 10, 0, Math.PI * 2);
+            fricCtx.fill();
+
+            // Brake warning signal
+            if (fricState.braking && !fricState.stopped) {
+                fricCtx.fillStyle = '#f43f5e';
+                fricCtx.beginPath();
+                fricCtx.arc(carX + 5, carY + 10, 6, 0, Math.PI * 2);
+                fricCtx.fill();
+            }
+        }
+
+        function frictionAnimate(timestamp) {
+            if (!fricState.braking) return;
+            if (!fricState.lastTime) fricState.lastTime = timestamp;
+            const dt = (timestamp - fricState.lastTime) / 1000;
+            fricState.lastTime = timestamp;
+
+            if (dt < 0.2) {
+                fricState.v -= fricState.a * dt;
+                if (fricState.v <= 0) {
+                    fricState.v = 0;
+                    fricState.braking = false;
+                    fricState.stopped = true;
+                }
+
+                fricState.x += fricState.v * dt * 10;
+                fricState.skidMarks.push({ x: fricState.x });
+            }
+
+            frictionDraw();
+
+            if (fricState.braking) {
+                requestAnimationFrame(frictionAnimate);
+            }
+        }
+
+        function frictionStart() {
+            if (fricState.braking) return;
+            fricState.x = 40;
+            fricState.v = fricState.vKm / 3.6;
+            fricState.skidMarks = [];
+            fricState.braking = true;
+            fricState.stopped = false;
+            fricState.lastTime = 0;
+            frictionCalculate();
+            requestAnimationFrame(frictionAnimate);
+        }
+
+        function frictionReset() {
+            fricState.braking = false;
+            fricState.stopped = false;
+            fricState.x = 40;
+            fricState.skidMarks = [];
+            frictionCalculate();
+            frictionDraw();
+        }
+
+        document.getElementById('fric-select-road').addEventListener('change', (e) => {
+            fricState.mu = parseFloat(e.target.value);
+            frictionCalculate();
+            frictionDraw();
+        });
+
+        document.getElementById('fric-slider-speed').addEventListener('input', (e) => {
+            fricState.vKm = parseFloat(e.target.value);
+            document.getElementById('fric-lbl-speed').innerText = fricState.vKm + ' km/soat';
+            frictionCalculate();
+            frictionDraw();
+        });
+
+        // ==========================================
+        // 4. PRUJINANI QUTQAR! (GUK QONUNI)
+        // ==========================================
+        const springCanvas = document.getElementById('canvas-spring');
+        const springCtx = springCanvas.getContext('2d');
+
+        let springState = {
+            m: 2.0,
+            k: 100,
+            x: 0,
+            F: 0
+        };
+
+        function springCalculate() {
+            const g = 9.81;
+            springState.F = springState.m * g;
+            springState.x = springState.F / springState.k;
+
+            document.getElementById('spring-val-f').innerText = springState.F.toFixed(2) + ' N';
+            document.getElementById('spring-val-x').innerText = springState.x.toFixed(2) + ' m';
+            document.getElementById('spring-val-k').innerText = springState.k + ' N/m';
+
+            const statusEl = document.getElementById('spring-val-status');
+            if (springState.x > 0.6) {
+                statusEl.innerText = "Plastik Deformatsiya!";
+                statusEl.className = "text-sm font-bold text-rose-500 animate-pulse";
+            } else {
+                statusEl.innerText = "Elastik Guk Qonuni";
+                statusEl.className = "text-sm font-bold text-emerald-400";
+            }
+        }
+
+        function springDraw() {
+            springCanvas.width = springCanvas.parentElement.clientWidth;
+            springCanvas.height = 320;
+
+            const w = springCanvas.width;
+            const h = springCanvas.height;
+
+            springCtx.clearRect(0, 0, w, h);
+
+            // Ceiling
+            springCtx.fillStyle = '#334155';
+            springCtx.fillRect(w/2 - 80, 20, 160, 15);
+
+            // Spring Coil parameters
+            const topY = 35;
+            const restLength = 80;
+            const stretchPixels = springState.x * 200; // visual scale
+            const currentLength = restLength + stretchPixels;
+            const coils = 12;
+            const springX = w/2;
+
+            springCtx.strokeStyle = springState.x > 0.6 ? '#f43f5e' : '#10b981';
+            springCtx.lineWidth = 4;
+            springCtx.beginPath();
+            springCtx.moveTo(springX, topY);
+
+            for (let i = 0; i < coils; i++) {
+                const y = topY + (currentLength / coils) * (i + 0.5);
+                const x = springX + (i % 2 === 0 ? 20 : -20);
+                springCtx.lineTo(x, y);
+            }
+            springCtx.lineTo(springX, topY + currentLength);
+            springCtx.stroke();
+
+            // Mass Weight Box
+            const boxY = topY + currentLength;
+            const boxW = 50 + springState.m * 4;
+            const boxH = 40;
+
+            springCtx.fillStyle = '#3b82f6';
+            springCtx.beginPath();
+            springCtx.roundRect(springX - boxW/2, boxY, boxW, boxH, 6);
+            springCtx.fill();
+            springCtx.strokeStyle = '#60a5fa';
+            springCtx.stroke();
+
+            springCtx.fillStyle = '#ffffff';
+            springCtx.font = 'bold 12px Inter';
+            springCtx.textAlign = 'center';
+            springCtx.fillText(springState.m + ' kg', springX, boxY + boxH/2 + 4);
+
+            // Ruler on the side
+            springCtx.strokeStyle = '#64748b';
+            springCtx.lineWidth = 1;
+            springCtx.beginPath();
+            springCtx.moveTo(springX + 80, topY + restLength);
+            springCtx.lineTo(springX + 80, topY + restLength + 150);
+            springCtx.stroke();
+
+            // Arrow showing delta x
+            if (springState.x > 0) {
+                drawArrow(springCtx, springX + 80, topY + restLength, springX + 80, boxY, '#f59e0b', 'x = ' + springState.x.toFixed(2) + 'm');
+            }
+        }
+
+        function checkSpringChallenge() {
+            // Target x = 0.25m with k=100 -> m = k*x / g = 100 * 0.25 / 9.81 = 2.55 kg approx
+            const targetM = (100 * 0.25) / 9.81;
+            if (Math.abs(springState.m - targetM) < 0.2) {
+                alert("BARAKALLA! To‘g‘ri massani tanladingiz. +15 Ball!");
+                recordAttempt(true, 15);
+            } else {
+                alert("Hali aniq emas. Qayta urinib ko‘ring! Maslahat: m = (k · x) / g kabi hisoblang.");
+                recordAttempt(false, 0);
+            }
+        }
+
+        document.getElementById('spring-slider-mass').addEventListener('input', (e) => {
+            springState.m = parseFloat(e.target.value);
+            document.getElementById('spring-lbl-mass').innerText = springState.m + ' kg';
+            springCalculate();
+            springDraw();
+        });
+
+        document.getElementById('spring-slider-k').addEventListener('input', (e) => {
+            springState.k = parseFloat(e.target.value);
+            document.getElementById('spring-lbl-k').innerText = springState.k + ' N/m';
+            springCalculate();
+            springDraw();
+        });
+
+        // ==========================================
+        // 5. ARXIMED KUCHI SIMULATION
+        // ==========================================
+        const buoyCanvas = document.getElementById('canvas-buoyancy');
+        const buoyCtx = buoyCanvas.getContext('2d');
+
+        let buoyState = {
+            mat: 'wood',
+            rhoObj: 600,
+            rhoFluid: 1000,
+            V: 0.002, // 2 Liters
+            y: 0,
+            dropped: false
+        };
+
+        function updateBuoyancyParams() {
+            const mat = document.getElementById('buoy-select-material').value;
+            if (mat === 'wood') buoyState.rhoObj = 600;
+            if (mat === 'plastic') buoyState.rhoObj = 920;
+            if (mat === 'brick') buoyState.rhoObj = 2400;
+            if (mat === 'iron') buoyState.rhoObj = 7800;
+
+            buoyState.rhoFluid = parseFloat(document.getElementById('buoy-select-fluid').value);
+            buoyCalculate();
+            buoyDraw();
+        }
+
+        function buoyCalculate() {
+            const g = 9.81;
+            const mass = buoyState.rhoObj * buoyState.V;
+            const Fg = mass * g;
+
+            // Submerged volume fraction
+            let Vsub = buoyState.V;
+            if (buoyState.rhoObj < buoyState.rhoFluid) {
+                Vsub = buoyState.V * (buoyState.rhoObj / buoyState.rhoFluid);
+            }
+            const Fa = buoyState.rhoFluid * g * Vsub;
+
+            document.getElementById('buoy-val-fa').innerText = Fa.toFixed(2) + ' N';
+            document.getElementById('buoy-val-fg').innerText = Fg.toFixed(2) + ' N';
+            document.getElementById('buoy-val-rho').innerText = buoyState.rhoObj + ' kg/m³';
+
+            const statusEl = document.getElementById('buoy-val-status');
+            if (buoyState.rhoObj < buoyState.rhoFluid) {
+                statusEl.innerText = "Yuzada Suzadi";
+                statusEl.className = "text-sm font-bold text-emerald-400";
+            } else if (buoyState.rhoObj === buoyState.rhoFluid) {
+                statusEl.innerText = "Suyuqlik Ichida Muallaq";
+                statusEl.className = "text-sm font-bold text-amber-400";
+            } else {
+                statusEl.innerText = "Tubiga Cho‘kadi";
+                statusEl.className = "text-sm font-bold text-rose-500";
+            }
+        }
+
+        function buoyDraw() {
+            buoyCanvas.width = buoyCanvas.parentElement.clientWidth;
+            buoyCanvas.height = 320;
+
+            const w = buoyCanvas.width;
+            const h = buoyCanvas.height;
+
+            buoyCtx.clearRect(0, 0, w, h);
+
+            // Tank Container
+            const tankX = w/2 - 120;
+            const tankY = 50;
+            const tankW = 240;
+            const tankH = 220;
+
+            // Fluid
+            const waterLevelY = tankY + 60;
+            buoyCtx.fillStyle = buoyState.rhoFluid > 1000 ? '#0284c7' : '#38bdf8';
+            buoyCtx.fillRect(tankX, waterLevelY, tankW, tankH - 60);
+
+            // Tank Glass Border
+            buoyCtx.strokeStyle = '#94a3b8';
+            buoyCtx.lineWidth = 4;
+            buoyCtx.strokeRect(tankX, tankY, tankW, tankH);
+
+            // Object Block
+            const side = 60;
+            let objY = tankY + 10; // above water before drop
+
+            if (buoyState.dropped) {
+                if (buoyState.rhoObj < buoyState.rhoFluid) {
+                    const submergedRatio = buoyState.rhoObj / buoyState.rhoFluid;
+                    objY = waterLevelY - side * (1 - submergedRatio);
+                } else {
+                    objY = tankY + tankH - side - 5; // bottom
+                }
+            }
+
+            const objX = w/2 - side/2;
+
+            // Material Colors
+            buoyCtx.fillStyle = buoyState.rhoObj < 800 ? '#d97706' : (buoyState.rhoObj < 1000 ? '#e2e8f0' : '#475569');
+            buoyCtx.beginPath();
+            buoyCtx.roundRect(objX, objY, side, side, 4);
+            buoyCtx.fill();
+            buoyCtx.strokeStyle = '#0f172a';
+            buoyCtx.lineWidth = 2;
+            buoyCtx.stroke();
+
+            // Vector arrows if dropped
+            if (buoyState.dropped) {
+                drawArrow(buoyCtx, objX + side/2, objY + side/2, objX + side/2, objY - 30, '#06b6d4', 'F_A');
+                drawArrow(buoyCtx, objX + side/2, objY + side/2, objX + side/2, objY + side + 30, '#f43f5e', 'F_g');
+            }
+        }
+
+        function dropBuoyancyObject() {
+            buoyState.dropped = true;
+            buoyCalculate();
+            buoyDraw();
+        }
+
+        document.getElementById('buoy-slider-vol').addEventListener('input', (e) => {
+            buoyState.V = parseFloat(e.target.value);
+            document.getElementById('buoy-lbl-vol').innerText = buoyState.V + ' m³';
+            buoyCalculate();
+            buoyDraw();
+        });
+
+        // ==========================================
+        // 6. KUCHLAR JANGI (ARQON TORTISH)
+        // ==========================================
+        const tugCanvas = document.getElementById('canvas-tug');
+        const tugCtx = tugCanvas.getContext('2d');
+
+        let tugState = {
+            f1: 100,
+            f2: 100,
+            ropeX: 0,
+            animating: false
+        };
+
+        function tugCalculate() {
+            const fnet = tugState.f1 - tugState.f2;
+            document.getElementById('tug-val-f1').innerText = tugState.f1 + ' N';
+            document.getElementById('tug-val-f2').innerText = tugState.f2 + ' N';
+            document.getElementById('tug-val-fnet').innerText = Math.abs(fnet) + ' N (' + (fnet > 0 ? 'Chap' : (fnet < 0 ? 'O‘ng' : 'Muvozanat')) + ')';
+        }
+
+        function tugDraw() {
+            tugCanvas.width = tugCanvas.parentElement.clientWidth;
+            tugCanvas.height = 320;
+
+            const w = tugCanvas.width;
+            const h = tugCanvas.height;
+
+            tugCtx.clearRect(0, 0, w, h);
+
+            const centerY = h/2 + 20;
+            const centerX = w/2 + tugState.ropeX;
+
+            // Rope line
+            tugCtx.strokeStyle = '#d97706';
+            tugCtx.lineWidth = 6;
+            tugCtx.beginPath();
+            tugCtx.moveTo(centerX - 180, centerY);
+            tugCtx.lineTo(centerX + 180, centerY);
+            tugCtx.stroke();
+
+            // Red Ribbon Marker in center
+            tugCtx.fillStyle = '#ef4444';
+            tugCtx.fillRect(centerX - 5, centerY - 15, 10, 30);
+
+            // Ground line
+            tugCtx.strokeStyle = '#475569';
+            tugCtx.lineWidth = 3;
+            tugCtx.beginPath();
+            tugCtx.moveTo(0, centerY + 40);
+            tugCtx.lineTo(w, centerY + 40);
+            tugCtx.stroke();
+
+            // Teams stickmen
+            // Left Team (Blue)
+            tugCtx.strokeStyle = '#3b82f6';
+            tugCtx.lineWidth = 4;
+            tugCtx.beginPath();
+            tugCtx.arc(centerX - 100, centerY - 30, 12, 0, Math.PI*2);
+            tugCtx.moveTo(centerX - 100, centerY - 18);
+            tugCtx.lineTo(centerX - 110, centerY + 20);
+            tugCtx.stroke();
+
+            // Right Team (Rose)
+            tugCtx.strokeStyle = '#f43f5e';
+            tugCtx.lineWidth = 4;
+            tugCtx.beginPath();
+            tugCtx.arc(centerX + 100, centerY - 30, 12, 0, Math.PI*2);
+            tugCtx.moveTo(centerX + 100, centerY - 18);
+            tugCtx.lineTo(centerX + 110, centerY + 20);
+            tugCtx.stroke();
+
+            // Force vectors
+            drawArrow(tugCtx, centerX - 40, centerY - 25, centerX - 40 - tugState.f1*0.4, centerY - 25, '#3b82f6', 'F1=' + tugState.f1 + 'N');
+            drawArrow(tugCtx, centerX + 40, centerY - 25, centerX + 40 + tugState.f2*0.4, centerY - 25, '#f43f5e', 'F2=' + tugState.f2 + 'N');
+        }
+
+        function tugAnimate() {
+            if (!tugState.animating) return;
+            const fnet = tugState.f1 - tugState.f2;
+
+            tugState.ropeX += fnet * 0.05;
+
+            tugDraw();
+
+            if (Math.abs(tugState.ropeX) < 120 && fnet !== 0) {
+                requestAnimationFrame(tugAnimate);
+            } else {
+                tugState.animating = false;
+            }
+        }
+
+        function tugStart() {
+            tugState.animating = true;
+            tugAnimate();
+        }
+
+        function tugReset() {
+            tugState.animating = false;
+            tugState.ropeX = 0;
+            tugCalculate();
+            tugDraw();
+        }
+
+        document.getElementById('tug-slider-f1').addEventListener('input', (e) => {
+            tugState.f1 = parseFloat(e.target.value);
+            document.getElementById('tug-lbl-f1').innerText = tugState.f1 + ' N';
+            tugCalculate();
+            tugDraw();
+        });
+
+        document.getElementById('tug-slider-f2').addEventListener('input', (e) => {
+            tugState.f2 = parseFloat(e.target.value);
+            document.getElementById('tug-lbl-f2').innerText = tugState.f2 + ' N';
+            tugCalculate();
+            tugDraw();
+        });
+
+        // ==========================================
+        // MINI QUIZZES FOR TABS 1-6
+        // ==========================================
+        const miniQuizzes = {
+            lab: [
+                {
+                    q: "1. Ishqalanish kuchi ortganda, aravachaning tezlanishi qanday o‘zgaradi?",
+                    options: ["Ortadi", "Kamayadi", "O‘zgarmaydi"],
+                    correct: 1,
+                    exp: "Nyutonning II qonuniga ko‘ra (a = (F - F_ishq)/m), ishqalanish kuchi ortsa, natijaviy kuch va tezlanish kamayadi."
+                },
+                {
+                    q: "2. Aravachaga ta’sir qiluvchi natijaviy kuch nolga teng bo‘lsa nima sodir bo‘ladi?",
+                    options: ["Tezlanuvchan harakat qiladi", "Tinch turadi yoki o‘zgarmas tezlik bilan to‘g‘ri chiziqli harakatlanadi", "Darhol to‘xtaydi"],
+                    correct: 1,
+                    exp: "Nyutonning birinchi qonuniga binoan, natijaviy kuch nol bo‘lsa jism inersiya bo‘yicha tinch turadi yoki tekis harakatlanadi."
+                }
+            ],
+            jump: [
+                {
+                    q: "1. Nima uchun Oyda Yerga qaraganda balandroq sakrash mumkin?",
+                    options: ["Oydagi havo qarshiligi tufayli", "Oyda erkin tushish tezlanishi g (1.62 m/s²) Yernikidan taxminan 6 baravar kichik", "Oyda odamning massasi kamayadi"],
+                    correct: 1,
+                    exp: "Sakrash balandligi h = v₀² / (2g) formulasiga bog‘liq. g qancha kichik bo‘lsa, h shuncha yuqori bo‘ladi."
+                },
+                {
+                    q: "2. Oyga uchgan kosmonavtning massasi qanday o‘zgaradi?",
+                    options: ["Kamayadi", "O‘zgarmaydi", "Ortadi"],
+                    correct: 1,
+                    exp: "Massa — jismdagi modda miqdori va inersionlik o‘lchovidir. U joyga bog‘liq emas. Faqat og‘irlik kuchi (F=mg) o‘zgaradi!"
+                }
+            ],
+            friction: [
+                {
+                    q: "1. Yomg‘irli va muzli yo‘llarda tormoz yo‘lining uzayishiga asosiy sabab nima?",
+                    options: ["Avtomobil massasining ortishi", "Sirtlar orasidagi ishqalanish koeffitsiyentining (μ) kamayishi", "Dvigatel quvvatining oshishi"],
+                    correct: 1,
+                    exp: "To‘xtash masofasi S = v² / (2·μ·g) dir. μ kamaysa, to‘xtash masofasi keskin ortadi."
+                }
+            ],
+            spring: [
+                {
+                    q: "1. Guk qonuniga ko‘ra prujinaning cho‘zilishi (x) osilgan kuchga qanday bog‘liq?",
+                    options: ["Teskari mutanosib", "To‘g‘ri mutanosib (F = k·x)", "Kvadratik bog‘liq"],
+                    correct: 1,
+                    exp: "F = k·x formulasiga binoan, kuch necha baravar ortsa, cho‘zilish ham shuncha baravar ortadi."
+                }
+            ],
+            buoyancy: [
+                {
+                    q: "1. Temirdan yasalgan ulkan kema suvda cho‘kmaydi, ammo kichik temir mix cho‘kadi. Sababi nima?",
+                    options: ["Kemada havo bo'shliqlari borligi sababli uning o‘rtacha zichligi suvnikidan kichik", "Kema juda og‘ir", "Suv temirni itarib chiqaradi"],
+                    correct: 0,
+                    exp: "Kemaning ichidagi bo‘shliqlar tufayli uning O‘RTACHA zichligi ρ_kema < ρ_suv bo‘ladi va u suzadi."
+                }
+            ],
+            tugofwar: [
+                {
+                    q: "1. Ikki jamoa bir-birini 150 N va 90 N qarama-qarshi kuchlar bilan tortsa, natijaviy kuch qancha bo‘ladi?",
+                    options: ["240 N", "60 N (kattaroq kuch tomonga)", "0 N"],
+                    correct: 1,
+                    exp: "Qarama-qarshi yo‘nalgan kuchlar ayriladi: F_nat = 150 N - 90 N = 60 N."
+                }
+            ]
+        };
+
+        function renderMiniQuizzes() {
+            for (let key in miniQuizzes) {
+                const container = document.getElementById(key + '-quiz-container');
+                if (!container) continue;
+                container.innerHTML = '';
+
+                miniQuizzes[key].forEach((qObj, idx) => {
+                    const qDiv = document.createElement('div');
+                    qDiv.className = "bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3";
+                    
+                    let optsHtml = '';
+                    qObj.options.forEach((opt, oIdx) => {
+                        optsHtml += `
+                            <button onclick="checkMiniAnswer('${key}', ${idx}, ${oIdx})" class="w-full text-left bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded-lg transition text-xs flex items-center justify-between">
+                                <span>${opt}</span>
+                                <i class="fa-regular fa-circle text-slate-500"></i>
+                            </button>
+                        `;
+                    });
+
+                    qDiv.innerHTML = `
+                        <p class="font-semibold text-sm text-slate-200">${qObj.q}</p>
+                        <div class="space-y-2">${optsHtml}</div>
+                        <div id="${key}-ans-${idx}" class="hidden p-3 rounded-lg text-xs space-y-1"></div>
+                    `;
+                    container.appendChild(qDiv);
+                });
+            }
+        }
+
+        function checkMiniAnswer(key, qIdx, oIdx) {
+            const qObj = miniQuizzes[key][qIdx];
+            const ansDiv = document.getElementById(`${key}-ans-${qIdx}`);
+            ansDiv.classList.remove('hidden');
+
+            const isCorrect = (oIdx === qObj.correct);
+            recordAttempt(isCorrect, 10);
+
+            if (isCorrect) {
+                ansDiv.className = "p-3 rounded-lg text-xs bg-emerald-950/80 border border-emerald-500/50 text-emerald-200";
+                ansDiv.innerHTML = `<span class="font-bold"><i class="fa-solid fa-circle-check mr-1"></i> BARAKALLA! To‘g‘ri javob (+10 Ball).</span><p class="mt-1">${qObj.exp}</p>`;
+            } else {
+                ansDiv.className = "p-3 rounded-lg text-xs bg-rose-950/80 border border-rose-500/50 text-rose-200";
+                ansDiv.innerHTML = `<span class="font-bold"><i class="fa-solid fa-circle-xmark mr-1"></i> Noto‘g‘ri!</span><p class="mt-1"><b>Ilmiy Izoh:</b> ${qObj.exp}</p>`;
+            }
+        }
+
+        // ==========================================
+        // 7. YAKUNIY COMPREHENSIVE QUIZ (15 SAVOL)
+        // ==========================================
+        const finalQuizQuestions = [
+            { q: "Nyutonning ikkinchi qonuni formulasini ko‘rsating.", opts: ["F = m·a", "F = k·x", "F = m·g", "P = F/S"], c: 0, exp: "Nyutonning II qonuni: Jismga ta'sir etuvchi natijaviy kuch uning massasi va tezlanishi ko‘paytmasiga teng." },
+            { q: "Jismning massasi Oyda qanday o‘zgaradi?", opts: ["6 baravar kamayadi", "O‘zgarmaydi", "6 baravar ortadi", "Nolga teng bo‘ladi"], c: 1, exp: "Massa invariant kattalikdir. Joy o‘zgarishi bilan faqat og‘irlik kuchi o‘zgaradi." },
+            { q: "Guk qonunida k kattaligi nimani anglatadi?", opts: ["Cho‘zilish masofasini", "Prujinaning bikirligini", "Ishqalanish koeffitsiyentini", "Hajmni"], c: 1, exp: "k - prujina bikirligi (N/m) bo'lib, uning qanchalik qattiqligini ko'rsatadi." },
+            { q: "Arximed kuchi qaysi formula bilan hisoblanadi?", opts: ["F_A = ρ_suyuqlik · g · V_botgan", "F_A = m · g", "F_A = k · x", "F_A = μ · N"], c: 0, exp: "Arximed kuchi suyuqlik zichligi, erkin tushish tezlanishi va botgan hajm ko'paytmasiga teng." },
+            { q: "Sirt tekisroq va silliqroq bo‘lsa, ishqalanish koeffitsiyenti (μ) qanday bo‘ladi?", opts: ["Kattaroq", "Kichikroq", "O‘zgarmaydi", "Nolga teng bo‘ladi"], c: 1, exp: "Silliq sirtlarda g‘adir-budurlik kam bo‘lgani uchun μ koeffitsiyent kichik bo‘ladi." },
+            { q: "Natijaviy kuch nolga teng bo‘lsa, jism harakati haqida nima deyish mumkin?", opts: ["Faqat tinch turadi", "Faqat tezlanuvchan harakat qiladi", "Tinch turadi yoki to‘g‘ri chiziqli tekis harakat qiladi", "Aylanma harakat qiladi"], c: 2, exp: "Bu Nyutonning birinchi qonuni (inersiya qonuni)dir." },
+            { q: "Erkin tushish tezlanishi g ning Yerdagi o‘rtacha qiymati qancha?", opts: ["1.62 m/s²", "9.81 m/s²", "3.71 m/s²", "24.79 m/s²"], c: 1, exp: "Yer sirtida g ≈ 9.81 m/s² ga teng." },
+            { q: "Massa m = 10 kg bo‘lgan jismga F = 50 N kuch berilsa, tezlanish qancha bo‘ladi?", opts: ["5 m/s²", "500 m/s²", "0.2 m/s²", "10 m/s²"], c: 0, exp: "a = F / m = 50 / 10 = 5 m/s²." },
+            { q: "Nima uchun yomg‘irli yuzada tormoz masofasi ortadi?", opts: ["Ishqalanish kamaygani uchun", "Avtomobil og‘irlashgani uchun", "Gravitatsiya kamaygani uchun", "Havo qarshiligi ortgani uchun"], c: 0, exp: "Suv qatlami ishqalanish koeffitsiyentini μ pasaytiradi." },
+            { q: "Jism suyuqlik tubiga cho‘kishi uchun qaysi shart bajarilishi kerak?", opts: ["ρ_jism < ρ_suyuqlik", "ρ_jism > ρ_suyuqlik", "ρ_jism = ρ_suyuqlik", "F_A > F_g"], c: 1, exp: "Jism zichligi suyuqliknikidan katta bo‘lsa, og‘irlik kuchi Arximed kuchidan ustun kelib cho‘kadi." },
+            { q: "Arqon tortishda chapga 200 N, o‘ngga 200 N kuch ta’sir etsa, natijaviy kuch qancha?", opts: ["400 N", "200 N", "0 N", "100 N"], c: 2, exp: "Qarama-qarshi teng kuchlar bir-birini kompensatsiyalaydi: 200 - 200 = 0 N." },
+            { q: "Og‘irlik kuchi qaysi yo‘nalishda yo‘nalgan?", opts: ["Vertikal yuqoriga", "Vertikal pastga (Yer markaziga)", "Harakat yo‘nalishida", "Ixtiyoriy"], c: 1, exp: "Og‘irlik kuchi doimo Yer markaziga (vertikal pastga) yo‘nalgan." },
+            { q: "Prujinaga 2 baravar ko‘p yuk osilsa, uning cho‘zilishi qanday o‘zgaradi?", opts: ["2 baravar ortadi", "O‘zgarmaydi", "2 baravar kamayadi", "4 baravar ortadi"], c: 0, exp: "Guk qonuniga ko‘ra F va x to‘g‘ri mutanosib." },
+            { q: "Dengiz suvining zichligi toza suvnikidan katta. Bir xil kema qayerda ko‘proq bota di?", opts: ["Dengiz suyida", "Toza suvda", "Ikkala suvda bir xil", "Cho‘kib ketadi"], c: 1, exp: "Toza suv zichligi kichikroq bo'lgani uchun kema ko'proq chuqurlikka botadi." },
+            { q: "Inersiya hodisasi nima?", opts: ["Jismning o‘z tezligini saqlashga intilishi", "Jismning og‘irlashishi", "Ishqalanishning yo‘qolishi", "Erkin tushish"], c: 0, exp: "Inersiya — tashqi kuch bo‘lmaganda jismning o‘z harakat holatini saqlash xossasidir." }
+        ];
+
+        let currentQuizIdx = 0;
+        let quizUserAnswers = new Array(finalQuizQuestions.length).fill(null);
+
+        function renderFinalQuizQuestion() {
+            const container = document.getElementById('final-quiz-card');
+            const qObj = finalQuizQuestions[currentQuizIdx];
+
+            document.getElementById('quiz-progress').innerText = `${currentQuizIdx + 1} / ${finalQuizQuestions.length}`;
+            document.getElementById('quiz-btn-prev').disabled = (currentQuizIdx === 0);
+
+            let optsHtml = '';
+            qObj.opts.forEach((opt, oIdx) => {
+                const isSelected = quizUserAnswers[currentQuizIdx] === oIdx;
+                const activeStyle = isSelected ? 'bg-blue-600/40 border-blue-500 text-white font-bold' : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-transparent';
+                
+                optsHtml += `
+                    <button onclick="selectFinalAnswer(${oIdx})" class="w-full text-left ${activeStyle} border p-3.5 rounded-xl transition text-sm flex items-center justify-between">
+                        <span>${opt}</span>
+                        <i class="fa-regular ${isSelected ? 'fa-circle-check text-blue-400' : 'fa-circle text-slate-500'}"></i>
+                    </button>
+                `;
+            });
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <h3 class="text-lg font-bold text-slate-100">${currentQuizIdx + 1}. ${qObj.q}</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">${optsHtml}</div>
+                </div>
+            `;
+        }
+
+        function selectFinalAnswer(oIdx) {
+            quizUserAnswers[currentQuizIdx] = oIdx;
+            renderFinalQuizQuestion();
+        }
+
+        function quizNextQuestion() {
+            if (currentQuizIdx < finalQuizQuestions.length - 1) {
+                currentQuizIdx++;
+                renderFinalQuizQuestion();
+            } else {
+                finishFinalQuiz();
+            }
+        }
+
+        function quizPrevQuestion() {
+            if (currentQuizIdx > 0) {
+                currentQuizIdx--;
+                renderFinalQuizQuestion();
+            }
+        }
+
+        function finishFinalQuiz() {
+            let correctCount = 0;
+            finalQuizQuestions.forEach((qObj, idx) => {
+                if (quizUserAnswers[idx] === qObj.c) {
+                    correctCount++;
+                }
+            });
+
+            const scorePct = Math.round((correctCount / finalQuizQuestions.length) * 100);
+
+            document.getElementById('final-quiz-card').classList.add('hidden');
+            document.getElementById('quiz-result-card').classList.remove('hidden');
+
+            document.getElementById('quiz-final-score').innerText = scorePct + '%';
+            document.getElementById('quiz-final-correct').innerText = `${correctCount} / ${finalQuizQuestions.length}`;
+
+            recordAttempt(true, scorePct);
+
+            let recText = "";
+            if (scorePct >= 85) {
+                recText = "<b class='text-emerald-400'>A'LO NATIJA!</b> Siz 'Tabiatda Kuchlar' mavzusini juda mukammal o‘zlashtiribsiz. Fizik qonuniyatlarni amalda qo‘llay olasiz.";
+            } else if (scorePct >= 70) {
+                recText = "<b class='text-blue-400'>YAXSHI NATIJA!</b> Asosiy tushunchalaringiz yaxshi, biroq ayrim modullardagi simulyatsiyalarni (masalan, Arximed va Guk qonuni) yana bir bor takrorlash tavsiya etiladi.";
+            } else {
+                recText = "<b class='text-amber-400'>QONIQARLI.</b> Ayrim fizik qonunlarda chalg‘ishlar bor. Iltimos, simulyatsiya bo‘limlariga qaytib tajribalarni va mini-testlarni qayta bajarib chiqing.";
+            }
+            document.getElementById('quiz-recommendations').innerHTML = recText;
+        }
+
+        function restartFullQuiz() {
+            currentQuizIdx = 0;
+            quizUserAnswers.fill(null);
+            document.getElementById('quiz-result-card').classList.add('hidden');
+            document.getElementById('final-quiz-card').classList.remove('hidden');
+            renderFinalQuizQuestion();
+        }
+
+        // Window onload initialization
+        window.onload = function() {
+            renderMiniQuizzes();
+            renderFinalQuizQuestion();
+
+            // Init default Tab (Lab)
+            labCalculate();
+            labDraw();
+        };
+
+        // Window Resize responsiveness for canvases
+        window.onresize = function() {
+            const activeTab = document.querySelector('.tab-content:not(.hidden)').id.replace('tab-', '');
+            initActiveTabCanvas(activeTab);
+        };
+    </script>
+</body>
+</html>
